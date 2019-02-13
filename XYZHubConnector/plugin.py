@@ -31,6 +31,7 @@ from .modules.space_loader import *
 # from .modules.bbox_loader import (InitLayerBboxController, InitLayerBboxOneController, 
 # InitLayerOneController,ReloadLayerBboxController)
 from .modules.refactor_loader import *
+from .modules import loader
 from .modules.layer.manager import LayerManager
 
 from .modules.network import NetManager
@@ -261,10 +262,12 @@ class XYZHubConnector(object):
     def cb_handle_error_msg(self, e):
         err = parse_exception_obj(e)
         if isinstance(err, ChainInterrupt):
-            net_err, idx = err.args[0:2]
-            if isinstance(net_err, net_handler.NetworkError):
-                ok = self.show_net_err_dialog(net_err)
+            e0, idx = err.args[0:2]
+            if isinstance(e0, net_handler.NetworkError):
+                ok = self.show_net_err_dialog(e0)
                 if ok: return
+            elif isinstance(e0, loader.EmptyXYZSpaceError):
+                ret = exec_warning_dialog("Warning","Requested query returns no features")
         self.show_err_msgbar(err)
 
     def show_net_err_dialog(self, err):
@@ -403,27 +406,15 @@ class XYZHubConnector(object):
 
 
         ############ connect btn        
-        con_load = ReloadLayerController(self.network, n_parallel=2)
+        con_load = loader.ReloadLayerController(self.network, n_parallel=2)
         self.con_man.add(con_load)
         # con_load.signal.finished.connect( self.refresh_canvas, Qt.QueuedConnection)
         con_load.signal.finished.connect( self.make_cb_success("Loading finish") )
         con_load.signal.error.connect( self.cb_handle_error_msg )
 
+        dialog.signal_space_connect.connect( con_load.start_args)
 
-        # con = LoadLayerController(self.network, n_parallel=1, max_feat=100000)
-        con = InitExtLayerController(self.network)
-        # con = InitLayerController(self.network)
-        self.con_man.add(con)
-        # con.signal.finished.connect( self.make_cb_success("Loading finish") )
-        
-        dialog.signal_space_connect.connect( con.start_args)
-
-        con.signal.results.connect( self.layer_man.add_args)
-        # con.signal.results.connect( con_bbox_reload.set_params_args)
-        con.signal.results.connect( con_load.start_args, Qt.QueuedConnection)
-        con.signal.error.connect( self.cb_handle_error_msg )
-
-        # con.signal.error.connect( print)
+        # con.signal.results.connect( self.layer_man.add_args) # IMPORTANT
 
 
         dialog.exec_()

@@ -13,8 +13,10 @@ from . import parser
 
 #init_shp_layer
 from ...utils import make_unique_full_path 
-from qgis.core import  QgsVectorFileWriter
+from qgis.core import  QgsVectorFileWriter, QgsCoordinateReferenceSystem
 from qgis.PyQt.QtCore import pyqtSignal, QObject
+
+from ...models.space_model import parse_copyright
 
 from ..common.signal import make_print_qgis
 print_qgis = make_print_qgis("layer")
@@ -24,40 +26,85 @@ class XYZLayer(object):
     + loading a new layer from xyz
     + uploading a qgis layer to xyz, add conn_info, meta, vlayer
     """
-    def __init__(self, conn_info, meta, ext="gpkg", vlayer=None):
+    def __init__(self, conn_info, meta, ext="gpkg"):
         super().__init__()
-        self.vlayer = vlayer
         self.conn_info = conn_info
         self.meta = meta
         self.ext = ext
-        if vlayer is not None:
-            self._save_meta(meta)
-    def unload(self):
-        pass
-        # self.deleteLater()
-    def is_valid(self):
-        return self.vlayer is not None
-    def get_layer(self):
-        return self.vlayer
-    def _save_meta(self, space_info):
-        self.vlayer.setCustomProperty("xyz-hub", space_info)
+
+        self.map_vlayer = dict()
+        self._map_vlayer = dict()
+        self.map_fields = dict()
+
+
+        crs = QgsCoordinateReferenceSystem('EPSG:4326').toWkt()
+        for geom in ["MultiPoint","MultiLineString","MultiPolygon",None]:
+            self._init_ext_layer(geom, crs)
+
+    def _save_meta(self, vlayer, space_info):
+        vlayer.setCustomProperty("xyz-hub", space_info)
         lic = space_info.get("license")
         cr = space_info.get("copyright")
-        print("license",lic,cr)
-        meta = self.vlayer.metadata()
+        meta = vlayer.metadata()
         if lic is not None:
             meta.setLicenses([lic])
-        if cr is not None:
-            txt = cr[0]["label"]
-            meta.setRights([txt])
-        self.vlayer.setMetadata(meta)
-    def _layer_name(self, meta):
-        return "{title} - {id}".format(**meta)
-    def get_xyz_feat_id(self):
-        vlayer = self.get_layer()
+        if isinstance(cr, list):
+            lst_txt = parse_copyright(cr)
+            meta.setRights(lst_txt)
+        vlayer.setMetadata(meta)
+
+    def is_valid(self, geom_str):
+        return geom_str in self.map_vlayer
+    def get_layer(self, geom_str):
+        return self.map_vlayer.get(geom_str)
+    def _layer_name(self, meta, geom_str):
+        return "{title} - {id} - {geom}".format(geom=geom_str,**meta)
+    def get_xyz_feat_id(self, geom_str):
+        vlayer = self.get_layer(geom_str)
         key = parser.QGS_XYZ_ID
         req = QgsFeatureRequest().setFilterExpression(key+" is not null").setSubsetOfAttributes([key], vlayer.fields())
         return set([ft.attribute(key) for ft in vlayer.getFeatures(req)])
+    def get_map_fields(self):
+        return self.map_fields
+    def get_feat_cnt(self):
+        cnt = 0
+        for vlayer in self.map_vlayer.values():
+            cnt += vlayer.featureCount()
+        return cnt
+    def show_ext_layer(self, geom_str):
+        vlayer = self._map_vlayer[geom_str]
+        self.map_vlayer[geom_str] = vlayer
+
+        QgsProject.instance().addMapLayer(vlayer)
+        return vlayer
+    def _init_ext_layer(self, geom_str, crs):
+        """ given non map of feat, init a qgis layer
+        :map_feat: {geom_string: list_of_feat}
+        """
+        ext=self.ext
+        driver_name = ext.upper() # might not needed for 
+        meta = self.meta
+
+        layer_name = self._layer_name(meta, geom_str)
+        
+        fname = make_unique_full_path(ext=ext)
+        
+        vlayer = QgsVectorLayer(
+            "{geom}?crs={crs}&index=yes".format(geom=geom_str,crs=crs), 
+            layer_name,"memory") # this should be done in main thread
+        QgsVectorFileWriter.writeAsVectorFormat(vlayer, fname, "UTF-8", vlayer.sourceCrs(), driver_name)
+    
+        
+        vlayer = QgsVectorLayer(fname, layer_name, "ogr")
+        self._map_vlayer[geom_str] = vlayer
+        self._save_meta(vlayer, meta)
+
+        self.map_fields[geom_str] = vlayer.fields()
+        # QgsProject.instance().addMapLayer(vlayer)
+        
+        return vlayer
+#DEPRECATED
+"""
     def init_mem_layer(self, txt, *a, **kw):
         # fname = make_unique_full_path(ext="json")
         # with open(fname,"w") as f:
@@ -70,7 +117,7 @@ class XYZLayer(object):
 
         layer_name = self._layer_name(meta)
         vlayer = QgsVectorLayer("{geom}?crs={crs}&index=yes".format(geom=geom,crs=crs), layer_name,"memory") # this should be done in main thread
-        self.vlayer = vlayer
+        self.map_vlayer = vlayer
         self._save_meta(meta)
         
         feat, fields = parser.xyz_json_to_feature(txt)
@@ -111,7 +158,7 @@ class XYZLayer(object):
         # # avoid recode
 
         vlayer = QgsVectorLayer(fname, layer_name, "ogr")
-        self.vlayer = vlayer
+        self.map_vlayer = vlayer
         self._save_meta(meta)
 
         fields = vlayer.fields()
@@ -140,7 +187,9 @@ class XYZLayer(object):
 
         QgsProject.instance().addMapLayer(vlayer)
         return vlayer
-        
+"""
+
+
 """ Available vector format for QgsVectorFileWriter
 [i.driverName for i in QgsVectorFileWriter.ogrDriverList()]
 ['GPKG', 'ESRI Shapefile', 'BNA',
