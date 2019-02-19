@@ -4,6 +4,7 @@
 # Copyright (c) 2019 HERE Europe B.V.
 #
 # SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
 #
 ###############################################################################
 
@@ -16,7 +17,7 @@ def parse_copyright(v):
         for el in v
     ]
     return lst
-        
+
 class QJsonTableModel(QAbstractTableModel):
     _header = list()
     def __init__(self, parent):
@@ -55,7 +56,6 @@ class QJsonTableModel(QAbstractTableModel):
             self.header = self._header + ([k for k in obj[0].keys() if k not in self._header])
         self.obj = obj
         self.endResetModel()
-
 
     #### Set/Get space selection (not needed anymore)
     def set_selected_index(self, index):

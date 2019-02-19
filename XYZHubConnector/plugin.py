@@ -4,6 +4,7 @@
 # Copyright (c) 2019 HERE Europe B.V.
 #
 # SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
 #
 ###############################################################################
 
@@ -63,6 +64,7 @@ class XYZHubConnector(object):
         self.web_menu = "&XYZ Hub Connector"
         self.init_modules()
         self.obj = self
+
     def initGui(self):
         """startup"""
 
@@ -84,14 +86,12 @@ class XYZHubConnector(object):
         self.action_manage = QAction("Manage XYZ Geospace (EXPERIMENTAL)", parent)
         self.action_edit = QAction("Edit/Delete XYZ Geospace (EXPERIMENTAL)", parent)
 
-
         if self.iface.activeLayer() is None:
             # self.action_upload.setEnabled(False)
             self.action_edit.setEnabled(False)
             self.action_magic_sync.setEnabled(False)
 
         # self.action_magic_sync.setVisible(False) # disable magic sync
-        
 
         ######## CONNECT action, button
 
@@ -102,8 +102,6 @@ class XYZHubConnector(object):
         self.action_magic_sync.triggered.connect(self.open_magic_sync_dialog)
         self.action_clear_cache.triggered.connect(self.open_clear_cache_dialog)
 
-        
-        
         ######## Add the toolbar + button
         self.toolbar = self.iface.addToolBar(PLUGIN_NAME)
         self.toolbar.setObjectName("XYZ Hub Connector")
@@ -124,7 +122,6 @@ class XYZHubConnector(object):
 
         self.xyz_widget_action = self.toolbar.addWidget(tool_btn)
 
-
         self.action_help = None
         # help
             # help_icon = QgsApplication.getThemeIcon("/mActionHelpContents.svg")
@@ -137,7 +134,6 @@ class XYZHubConnector(object):
 
             # self.iface.addPluginToWebMenu(self.web_menu, self.action_help)
 
-        
         self.action_reload = QAction(icon_bbox, "Reload BBox", parent)
         self.action_reload.triggered.connect(self.layer_reload_bbox)
         self.action_reload.setVisible(False) # disable
@@ -151,8 +147,6 @@ class XYZHubConnector(object):
         # progress = self.iface.statusBarIface().children()[2] # will be hidden by qgis
         self.iface.statusBarIface().addPermanentWidget(progress)
         self.pb = progress
-
-        
 
     def init_modules(self):
         # util.init_module()
@@ -175,7 +169,6 @@ class XYZHubConnector(object):
         
         print(config.PLUGIN_DIR)
         self.token_model.load_ini(config.PLUGIN_DIR +"/token.ini")
-
 
         ######## CALLBACK
         # self.iface.mapCanvas().extentsChanged.connect( self.debug_reload)
@@ -216,7 +209,7 @@ class XYZHubConnector(object):
         # del self.con_man
 
         # self.iface.mapCanvas().extentsChanged.disconnect( self.debug_reload)
-        
+
         close_print_qgis()
         pass
     def unload(self):
@@ -235,6 +228,7 @@ class XYZHubConnector(object):
         # self.iface.removeWebToolBarIcon(self.action_dialog)
         # self.iface.removePluginVectorMenu(u"&QuickOSM", self.myQueriesAction)
         # del self
+
     ############### 
     # Callback
     ###############
@@ -253,12 +247,14 @@ class XYZHubConnector(object):
         self.iface.messageBar().pushMessage(
             msg, info,  
             Qgis.Success, 1
-        )        
+        )
+
     def make_cb_success(self, msg, info=""):
         def _cb_success_msg():
             txt = info
             self.cb_success_msg(msg, txt)
         return _cb_success_msg
+
     def cb_handle_error_msg(self, e):
         err = parse_exception_obj(e)
         if isinstance(err, ChainInterrupt):
@@ -284,6 +280,7 @@ class XYZHubConnector(object):
             msg += "\n\n" + "Please make sure that the token has WRITE permission"
         ret = exec_warning_dialog("Network Error",msg, body)
         return 1
+
     def show_err_msgbar(self, err):
         self.iface.messageBar().pushMessage(
             TAG_PLUGIN, repr(err),  
@@ -292,14 +289,15 @@ class XYZHubConnector(object):
         msg = format_traceback(err)
         QgsMessageLog.logMessage( msg, TAG_PLUGIN, Qgis.Warning)
 
-
     def cb_progress_busy(self, n_active):
         if n_active > 1: return
         self.flag_pb_show=True
         self.cb_progress_refresh()
+
     def cb_progress_done(self):
         self.flag_pb_show=False
         self.cb_progress_refresh()
+
     def cb_progress_refresh(self):
         if not hasattr(self,"flag_pb_show"): return
 
@@ -335,16 +333,18 @@ class XYZHubConnector(object):
         layer_id = self.iface.activeLayer().id()
         layer = self.layer_man.get(layer_id)
         self.load_bbox(con_bbox_reload, make_qt_args(layer))
-        
+
     # UNUSED
     def debug_reload(self):
         print("debug_reload")
+
     def refresh_canvas(self):
         self.iface.mapCanvas().refresh()
         # assert False # debug unload module
+
     def previous_canvas_extent(self):
         self.iface.mapCanvas().zoomToPreviousExtent()
-    #
+
     def open_clear_cache_dialog(self):
         parent = self.iface.mainWindow()
         dialog = ConfirmDialog(parent, "Delete cache will make loaded layer unusable !!")
@@ -352,6 +352,7 @@ class XYZHubConnector(object):
         if ret != dialog.Ok: return
         
         utils.clear_cache()
+
     def open_connection_dialog(self):
         parent = self.iface.mainWindow()
         dialog = ConnectManageSpaceDialog(parent)
@@ -419,18 +420,20 @@ class XYZHubConnector(object):
 
         dialog.exec_()
         # self.startTime = time.time()
+
     def open_manage_dialog(self):
         pass
+
     def open_edit_dialog(self):
         pass
+
     def open_upload_dialog(self):
         vlayer = self.iface.activeLayer()
         parent = self.iface.mainWindow()
         dialog = UploadNewSpaceDialog(parent)
         dialog.config(self.token_model, self.network, vlayer)
-        
-        ############ Use Token btn        
-        
+
+        ############ Use Token btn
         con = LoadSpaceController(self.network)
         self.con_man.add(con)
         con.signal.results.connect( make_fun_args(dialog.cb_set_valid_token) ) # finished signal !?
@@ -452,5 +455,6 @@ class XYZHubConnector(object):
         con.signal.error.connect( self.cb_handle_error_msg )
 
         dialog.exec_()
+
     def open_magic_sync_dialog(self):
         pass

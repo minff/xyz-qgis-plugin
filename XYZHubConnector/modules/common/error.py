@@ -4,6 +4,7 @@
 # Copyright (c) 2019 HERE Europe B.V.
 #
 # SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
 #
 ###############################################################################
 
@@ -12,7 +13,7 @@ import traceback
 #unused
 class ExceptionContainer(Exception):
     pass
-    
+
 def parse_exception_obj(obj):
     return obj
 def make_exception_obj(e):

@@ -4,6 +4,7 @@
 # Copyright (c) 2019 HERE Europe B.V.
 #
 # SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
 #
 ###############################################################################
 
@@ -11,7 +12,7 @@ from qgis.core import QgsVectorLayer, QgsProject, QgsFeatureRequest
 from . import render
 from . import parser
 
-#init_shp_layer
+# init_shp_layer
 from ...utils import make_unique_full_path 
 from qgis.core import  QgsVectorFileWriter, QgsCoordinateReferenceSystem
 from qgis.PyQt.QtCore import pyqtSignal, QObject

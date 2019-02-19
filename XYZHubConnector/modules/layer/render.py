@@ -4,6 +4,7 @@
 # Copyright (c) 2019 HERE Europe B.V.
 #
 # SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
 #
 ###############################################################################
 
@@ -14,8 +15,6 @@ from . import parser
 from ..common.signal import make_print_qgis
 
 print_qgis = make_print_qgis("render")
-
-
 
 ######### to Memory Layer
 import json
@@ -54,7 +53,7 @@ def merge_feature(txt, vlayer, fields, exist_feat_id):
 def parse_feature(txt, map_fields):
     map_feat, map_fields = parser.xyz_json_to_feature(txt, map_fields)
     return map_feat, map_fields
-    
+
 def truncate_add_render(vlayer, feat, new_fields):
     pr = vlayer.dataProvider()
     if pr.truncate():

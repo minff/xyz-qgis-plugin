@@ -4,6 +4,7 @@
 # Copyright (c) 2019 HERE Europe B.V.
 #
 # SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
 #
 ###############################################################################
 
@@ -23,8 +24,9 @@ class TokenModel(QStandardItemModel):
     
     def cb_set_server(self, server):
         pass
+
     #### experimental: logic in token model, instead of in comobobox (view)
-    
+
     def _load_ini(self, ini):
         it = self.invisibleRootItem()
         it.appendRow(QStandardItem())
@@ -38,9 +40,9 @@ class TokenModel(QStandardItemModel):
         except TypeError: pass
         try: self.rowsAboutToBeRemoved.disconnect()
         except TypeError: pass
-        
+
         self.rowsInserted.connect(self._cb_append_token_to_file)
-        
+
         # persistent remove (uncomment next line)
         self.rowsAboutToBeRemoved.connect(self._cb_remove_token_from_file)
     def _cb_remove_token_from_file(self, root, i0, i1):
@@ -84,7 +86,7 @@ class GroupTokenModel(TokenModel):
             QStandardItem(t) for t in tokens
             if len(t) > 0
             ])
-    
+
     def _write_to_file(self):
         if self.ini == "": return
         with open(self.ini, "w") as f:
@@ -100,7 +102,7 @@ class GroupTokenModel(TokenModel):
             token_groups.read_file(f)
         
         self.token_groups = token_groups
-    
+
     def _cb_remove_token_from_file(self, root, i0, i1):
         if not self._is_valid_single_selection(i0, i1): return # do not write multiple added items appendRows
         token = self.item(i0).text().strip()

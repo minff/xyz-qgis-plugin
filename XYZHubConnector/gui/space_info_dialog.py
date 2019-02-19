@@ -4,6 +4,7 @@
 # Copyright (c) 2019 HERE Europe B.V.
 #
 # SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
 #
 ###############################################################################
 
@@ -22,11 +23,13 @@ EditSpaceDialogUI = get_ui_class("edit_space_dialog.ui")
 # EditSpaceLayerDialogUI = get_ui_class("edit_space_layer_dialog.ui")
 def copyright_from_txt(txt):
     return [dict(label=txt)] if len(txt) > 0 else None
+
 def txt_from_copyright(obj):
     return obj[0].get("label") if isinstance(obj,list) and len(obj) > 0 else ""
 
 class BaseSpaceInfoDialog(QDialog):
     title = "XYZ"
+
     def __init__(self, parent=None):
         """init window"""
         QDialog.__init__(self, parent)
@@ -79,6 +82,7 @@ class UploadNewSpaceDialog(SpaceInfoDialog, TokenUX):
     # ui = UP_CLASS()
     title = "Upload to new XYZ Geospace"
     signal_upload_new_space = pyqtSignal(object)
+
     def __init__(self, *a):
         SpaceInfoDialog.__init__(self,*a)
         
@@ -86,6 +90,7 @@ class UploadNewSpaceDialog(SpaceInfoDialog, TokenUX):
         # self.used_token_idx = 0
         
         self.setWindowTitle(self.title)
+
     def config(self, token_model, network, vlayer):
         self.network = network
         self.vlayer = vlayer
@@ -98,6 +103,7 @@ class UploadNewSpaceDialog(SpaceInfoDialog, TokenUX):
 
         self.buttonBox.button(self.buttonBox.Ok).setText("Create and Upload")
         self.accepted.connect(self.start_upload)
+
     ########## COMBOBOX Config + Function
 
     def config_ui_token(self, token_model):
@@ -106,12 +112,12 @@ class UploadNewSpaceDialog(SpaceInfoDialog, TokenUX):
     def cb_set_valid_token(self, *a):
         self.insert_new_valid_token()
         self.ui_valid_input()
-        
+
     def ui_enable_ok_button(self, flag):
         self.buttonBox.button(self.buttonBox.Ok).setEnabled(flag)
         self.buttonBox.button(self.buttonBox.Ok).clearFocus()
-        
-    # check lineEdit as well
+
+    # Check lineEdit as well
     def ui_valid_input(self, flag=None):
         ok = (
             self.ui_valid_token(flag) and 
@@ -122,7 +128,6 @@ class UploadNewSpaceDialog(SpaceInfoDialog, TokenUX):
         self.ui_enable_ok_button( ok)
         
     def start_upload(self):
-        
         self.conn_info.set_(token=self.get_input_token())
         
         token = self.get_input_token()
@@ -135,6 +140,7 @@ class UploadNewSpaceDialog(SpaceInfoDialog, TokenUX):
 
 class EditSpaceDialog(SpaceInfoDialog):
     title = "Edit XYZ Geospace"
+
     def __init__(self, parent=None):
         SpaceInfoDialog.__init__(self, parent)
         

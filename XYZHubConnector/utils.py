@@ -4,6 +4,7 @@
 # Copyright (c) 2019 HERE Europe B.V.
 #
 # SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
 #
 ###############################################################################
 
@@ -11,6 +12,7 @@ from qgis.PyQt.uic import loadUiType
 from . import config
 import os
 import time
+
 def disconnect_silent(signal):
     ok = True
     try: signal.disconnect()

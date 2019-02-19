@@ -74,7 +74,7 @@ def feature_collection(features):
         "type": "FeatureCollection",
         "features": features
     }
-    
+
 def feature_to_xyz_json(feature, vlayer, is_new=False):
     def _xyz_props(props):
         # rp = props.get("rp") # what is rp ?
@@ -114,7 +114,6 @@ def feature_to_xyz_json(feature, vlayer, is_new=False):
             # print(obj)
             return obj
         obj["geometry"] = geom_
-
 
         # bbox = geom.boundingBox()
         # # print("bbox: %s"%bbox.toString())
@@ -237,7 +236,7 @@ def xyz_json_to_feature(txt, map_fields=dict()):
         # print_qgis("names", names, type(names))
 
         return feat
-        
+
     def _single_feature_map(feat_json, map_feat, map_fields):
         geom = feat_json.get("geometry")
         g = geom["type"] if geom is not None else None
@@ -264,7 +263,6 @@ def xyz_json_to_feature(txt, map_fields=dict()):
     # with open(fname,"w",encoding="utf-8") as f:
     #     f.write(txt)
 
-
     obj = json.loads(txt)
     feature = obj["features"]
 
@@ -275,7 +273,7 @@ def xyz_json_to_feature(txt, map_fields=dict()):
 
     for ft in feature:
         _single_feature_map(ft, map_feat, map_fields) 
-        
+
         # # try to fix bad geom (copy geom from uom)
         # if "geometry" not in feature[0]:
         #     feat = list( 
@@ -287,6 +285,5 @@ def xyz_json_to_feature(txt, map_fields=dict()):
     # print_qgis(list(feat[-1].attributes()) if len(feat) else "")
     # print_qgis("fields", fields.count(), "names", fields.names())
     # print_qgis([(f.name(),f.typeName()) for f in fields])
-
 
     return map_feat, map_fields

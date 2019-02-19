@@ -4,6 +4,7 @@
 # Copyright (c) 2019 HERE Europe B.V.
 #
 # SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
 #
 ###############################################################################
 
@@ -20,4 +21,3 @@ def _get_feat_upload_from_iter(feat_iter, vlayer):
     obj = parser.make_lst_feature_collection(added_feat)
     removed_feat = list()
     return obj, removed_feat
-    
