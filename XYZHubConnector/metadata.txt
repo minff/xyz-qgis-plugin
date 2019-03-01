@@ -29,7 +29,7 @@ repository=https://github.com/heremaps/xyz-qgis-plugin
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=HERE XYZ Hub, connector, python
+tags=HERE XYZ Hub, connector, api, upload, download
 
 homepage=https://github.com/heremaps/xyz-qgis-plugin
 category=Plugins
