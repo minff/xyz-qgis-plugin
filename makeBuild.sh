@@ -1,3 +1,5 @@
+#!/bin/bash
+
 [[ "$#" -lt 1 ]] && echo No version given. Exiting.. && exit
 ver=$1
 # if [ "$#" -lt 1 ]; then

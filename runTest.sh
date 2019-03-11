@@ -1,4 +1,6 @@
+#!/bin/bash
 # python_qgis and test variables like APP_ID needs to be defined in env.sh
+shopt -s expand_aliases
 
 [[ "$#" -lt 1 ]] && echo No test python file given.. && exit
 py=$1

@@ -1,0 +1,13 @@
+
+services:
+  - docker
+  
+before_install:
+  - source makeBuild.sh 1.5.6-pre
+  - docker build -t qgis_dev .
+  - docker run -d -p 127.0.0.1:80:4567 qgis_dev /bin/bash -c "ls;"
+  - docker ps -a
+  - docker run qgis_dev /bin/bash -c "cd /xyz_qgis_plugin; source runTest.sh test/test_basemap.py"
+
+script:
+  - sh makeBuild.sh 1.5.6
