@@ -29,17 +29,25 @@ class ManualInterrupt(Exception):
     pass
     
 class ReloadLayerController(BaseLoader):
+    """ Load XYZ space into several qgis layer separated by Geometry type.
+    If space is empty, no layer shall be created.
+    """
     def __init__(self, network, n_parallel=1):
         super(ReloadLayerController, self).__init__()
         self.pool = QThreadPool() # .globalInstance() will crash afterward
         self.n_parallel = 1
         self.status = self.LOADING
         self._config(network)
+    def post_render(self):
+        for v in self.layer.map_vlayer.values():
+            v.triggerRepaint()
     def start(self, conn_info, meta, **kw):
         self.layer = XYZLayer(conn_info, meta)
         self.kw = kw
         self.max_feat = kw.get("max_feat", None)
         self.fixed_params = dict( (k,kw[k]) for k in ["tags"] if k in kw)
+
+        self.signal.finished.connect(self.post_render)
 
         # super(BaseLoader,self): super of BaseLoader 
         super(ReloadLayerController, self).start( **kw)

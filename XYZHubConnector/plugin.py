@@ -17,35 +17,41 @@ from qgis.core import Qgis, QgsMessageLog
 from qgis.PyQt.QtCore import QCoreApplication, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QToolButton, QWidgetAction
+from qgis.PyQt.QtWidgets import QProgressBar, QSizePolicy
+
+from . import config
+from . import utils
 
 from .gui.space_dialog import ConnectManageSpaceDialog, ManageSpaceDialog
 from .gui.space_info_dialog import EditSpaceDialog, UploadNewSpaceDialog
 from .gui.util_dialog import ConfirmDialog
+from .gui.basemap_dialog import BaseMapDialog
 
 from .models import SpaceConnectionInfo, TokenModel, GroupTokenModel
 from .modules.controller import ChainController
-from . import config
-from . import utils
 from .modules.controller import AsyncFun, parse_qt_args, make_qt_args, make_fun_args
-from .modules.space_loader import *
+from .modules.controller.manager import ControllerManager
 
-from .modules.refactor_loader import *
 from .modules import loader
+from .modules.space_loader import *
+from .modules.refactor_loader import *
+
 from .modules.layer.manager import LayerManager
+from .modules.layer import bbox_utils
 
 from .modules.network import NetManager
-from .modules.layer import bbox_utils
-from .modules.controller.manager import ControllerManager
+
+from .modules import basemap
+from .modules.basemap.auth_manager import AuthManager
 
 from .modules.common.error import format_traceback
 
-from qgis.PyQt.QtWidgets import QProgressBar, QSizePolicy
 
 PLUGIN_NAME = config.PLUGIN_NAME
-
 TAG_PLUGIN = "XYZ Hub"
 
 DEBUG = 1
+
 from .modules.common.signal import make_print_qgis, close_print_qgis
 print_qgis = make_print_qgis(TAG_PLUGIN,debug=True)
 
@@ -80,6 +86,9 @@ class XYZHubConnector(object):
 
         self.action_clear_cache = QAction("Clear cache", parent)
         self.action_upload = QAction("Upload to New XYZ Geospace", parent)
+        self.action_basemap = QAction("Add HERE Map Tile", parent)
+
+
         self.action_magic_sync = QAction("Magic Sync (EXPERIMENTAL)", parent)
         self.action_manage = QAction("Manage XYZ Geospace (EXPERIMENTAL)", parent)
         self.action_edit = QAction("Edit/Delete XYZ Geospace (EXPERIMENTAL)", parent)
@@ -99,6 +108,7 @@ class XYZHubConnector(object):
         self.action_upload.triggered.connect(self.open_upload_dialog)
         self.action_magic_sync.triggered.connect(self.open_magic_sync_dialog)
         self.action_clear_cache.triggered.connect(self.open_clear_cache_dialog)
+        self.action_basemap.triggered.connect(self.open_basemap_dialog)
 
         ######## Add the toolbar + button
         self.toolbar = self.iface.addToolBar(PLUGIN_NAME)
@@ -106,7 +116,7 @@ class XYZHubConnector(object):
 
         tool_btn = QToolButton(self.toolbar)
 
-        self.actions = [self.action_connect, self.action_upload, self.action_clear_cache] # , self.action_magic_sync, self.action_manage, self.action_edit
+        self.actions = [self.action_connect, self.action_upload, self.action_basemap, self.action_clear_cache] # , self.action_magic_sync, self.action_manage, self.action_edit
         for a in self.actions:
             tool_btn.addAction(a)
             self.iface.addPluginToWebMenu(self.web_menu, a)
@@ -137,7 +147,11 @@ class XYZHubConnector(object):
 
         # parent = self.iface.mainWindow()
         parent = QgsProject.instance()
+
         ######## Init xyz modules
+        self.map_basemap_meta = basemap.load_default_xml()
+        self.auth_manager = AuthManager(config.USER_PLUGIN_DIR +"/auth.ini")
+        
         self.token_model = GroupTokenModel(parent)
         # self.layer = LayerManager(parent, self.iface)
 
@@ -150,13 +164,9 @@ class XYZHubConnector(object):
         self.conn_info = SpaceConnectionInfo()
         
         ######## token      
-        print(config.PLUGIN_DIR)
-        self.token_model.load_ini(config.PLUGIN_DIR +"/token.ini")
+        self.token_model.load_ini(config.USER_PLUGIN_DIR +"/token.ini")
 
         ######## CALLBACK
-        # self.iface.mapCanvas().extentsChanged.connect( self.debug_reload)
-        # self.con_man.connect_ux( self.iface) # canvas ux
-        # self.con_man.signal.canvas_span.connect( self.loader_reload_bbox)
         
         self.con_man.ld_pool.signal.progress.connect( self.cb_progress_busy) #, Qt.QueuedConnection
         self.con_man.ld_pool.signal.finished.connect( self.cb_progress_done)
@@ -175,9 +185,6 @@ class XYZHubConnector(object):
         QgsProject.instance().layersWillBeRemoved["QStringList"].disconnect( self.con_man.remove)
 
         # utils.disconnect_silent(self.iface.currentLayerChanged)
-
-        # self.con_man.unload()
-        # del self.con_man
 
         # self.iface.mapCanvas().extentsChanged.disconnect( self.debug_reload)
 
@@ -296,18 +303,15 @@ class XYZHubConnector(object):
         layer_id = self.iface.activeLayer().id()
         layer = self.layer_man.get(layer_id)
         self.load_bbox(con_bbox_reload, make_qt_args(layer))
-
+        
     # UNUSED
-    def debug_reload(self):
-        print("debug_reload")
-
     def refresh_canvas(self):
+        # self.iface.activeLayer().triggerRepaint()
         self.iface.mapCanvas().refresh()
-        # assert False # debug unload module
-
     def previous_canvas_extent(self):
         self.iface.mapCanvas().zoomToPreviousExtent()
-
+    #
+    
     def open_clear_cache_dialog(self):
         parent = self.iface.mainWindow()
         dialog = ConfirmDialog(parent, "Delete cache will make loaded layer unusable !!")
@@ -324,7 +328,7 @@ class XYZHubConnector(object):
         ############ edit btn   
 
         con = EditSpaceController(self.network)
-        self.con_man.add(con)
+        self.con_man.add_background(con)
         con.signal.finished.connect( dialog.btn_use.clicked.emit )
         con.signal.error.connect( self.cb_handle_error_msg )
         dialog.signal_edit_space.connect( con.start_args)
@@ -332,7 +336,7 @@ class XYZHubConnector(object):
         ############ delete btn        
 
         con = DeleteSpaceController(self.network)
-        self.con_man.add(con)
+        self.con_man.add_background(con)
         con.signal.results.connect( dialog.btn_use.clicked.emit )
         con.signal.error.connect( self.cb_handle_error_msg )
         dialog.signal_del_space.connect( con.start_args)
@@ -358,9 +362,9 @@ class XYZHubConnector(object):
 
         ############ connect btn        
         con_load = loader.ReloadLayerController(self.network, n_parallel=2)
-        self.con_man.add(con_load)
-        # con_load.signal.finished.connect( self.refresh_canvas, Qt.QueuedConnection)
+        self.con_man.add_background(con_load)
         con_load.signal.finished.connect( self.make_cb_success("Loading finish") )
+        # con_load.signal.finished.connect( self.refresh_canvas, Qt.QueuedConnection)
         con_load.signal.error.connect( self.cb_handle_error_msg )
 
         dialog.signal_space_connect.connect( con_load.start_args)
@@ -369,6 +373,7 @@ class XYZHubConnector(object):
 
 
         dialog.exec_()
+        self.con_man.finish_fast()
         # self.startTime = time.time()
 
     def open_manage_dialog(self):
@@ -393,18 +398,32 @@ class XYZHubConnector(object):
 
 
         con_upload = UploadLayerController(self.network, n_parallel=2)
-        self.con_man.add(con_upload)
+        self.con_man.add_background(con_upload)
         con_upload.signal.finished.connect( self.make_cb_success("Uploading finish") )
         con_upload.signal.error.connect( self.cb_handle_error_msg )
 
         con = InitUploadLayerController(self.network)
-        self.con_man.add(con)
+        self.con_man.add_background(con)
 
         dialog.signal_upload_new_space.connect( con.start_args)
         con.signal.results.connect( con_upload.start_args)
         con.signal.error.connect( self.cb_handle_error_msg )
 
         dialog.exec_()
-
+        self.con_man.finish_fast()
     def open_magic_sync_dialog(self):
         pass
+
+    def open_basemap_dialog(self):
+        parent = self.iface.mainWindow()
+        auth = self.auth_manager.get_auth()
+        dialog = BaseMapDialog(parent)
+        dialog.config(self.map_basemap_meta, auth)
+        dialog.signal_add_basemap.connect( self.add_basemap_layer)
+
+        dialog.exec_()
+    def add_basemap_layer(self, args):
+        a, kw = parse_qt_args(args)
+        meta, app_id, app_code = a
+        self.auth_manager.save(app_id, app_code)
+        basemap.add_basemap_layer( meta, app_id, app_code)
