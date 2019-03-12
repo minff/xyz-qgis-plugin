@@ -9,11 +9,11 @@ do_test: &do_test
   services:
     - docker
   install: 
-    - echo docker build -t qgis_dev .
+    - docker build -t qgis_dev .
     # - docker run -d -p 127.0.0.1:80:4567 qgis_dev /bin/bash -c "ls;"
     # - docker ps -a
   script: 
-    - echo $TEST docker run qgis_dev /bin/bash -c "cd /xyz_qgis_plugin; source runTest.sh test/$TEST"
+    - docker run qgis_dev /bin/bash -c "cd /xyz_qgis_plugin; source runTest.sh test/$TEST"
 jobs:
   include:
     - stage: build
