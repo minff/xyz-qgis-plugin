@@ -1,24 +1,22 @@
+language: minimal
 
-services:
-  - docker
-  
 stages:
   - build
   - test
-env: 
-  - TEST=test_basemap.py
-  - TEST=test_basemap1.py
-install: 
-  - ls
-  # - docker build -t qgis_dev .
-  # - docker run -d -p 127.0.0.1:80:4567 qgis_dev /bin/bash -c "ls;"
-  # - docker ps -a
-script:
-  # - docker run qgis_dev /bin/bash -c "cd /xyz_qgis_plugin; source runTest.sh test/$TEST"
-  - echo "test/$TEST"
-
 
 jobs:
   include:
     - stage: build
-      script: source makeBuild.sh 1.5.6
+      script: echo build source makeBuild.sh 1.5.6
+    - stage: test
+      services:
+        - docker
+      env: 
+        - TEST=test_basemap.py
+        - TEST=test_basemap1.py
+      install: 
+        - echo docker build -t qgis_dev .
+        # - docker run -d -p 127.0.0.1:80:4567 qgis_dev /bin/bash -c "ls;"
+        # - docker ps -a
+      script:
+        - echo $TEST docker run qgis_dev /bin/bash -c "cd /xyz_qgis_plugin; source runTest.sh test/$TEST"
