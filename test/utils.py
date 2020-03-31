@@ -14,7 +14,7 @@ from qgis.testing import unittest, start_app
 from XYZHubConnector.xyz_qgis.controller import AsyncFun, WorkerFun
 from XYZHubConnector.xyz_qgis.common.error import pretty_print_error
 from XYZHubConnector.xyz_qgis.network import NetManager, net_handler
-from XYZHubConnector.models import SpaceConnectionInfo
+from XYZHubConnector.xyz_qgis.models import SpaceConnectionInfo
 
 import time
 import sys

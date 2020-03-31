@@ -17,7 +17,7 @@ from qgis.PyQt.QtWidgets import QDialog, QInputDialog
 from . import get_ui_class
 # from .token_ux import TokenUX
 
-from ..models import SpaceConnectionInfo
+from ..xyz_qgis.models import SpaceConnectionInfo
 from ..xyz_qgis.controller import make_qt_args
 
 # EditSpaceLayerDialogUI and EditSpaceDialogUI: most of the components are same

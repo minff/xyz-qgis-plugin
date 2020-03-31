@@ -146,7 +146,7 @@ if __name__ == "__main__":
     
     from XYZHubConnector.xyz_qgis.network import NetManager
     from qgis.PyQt.QtCore import QEventLoop, Qt
-    from XYZHubConnector.models.connection import SpaceConnectionInfo
+    from XYZHubConnector.xyz_qgis.models.connection import SpaceConnectionInfo
     conn_info = SpaceConnectionInfo()
     conn_info.set_(space_id="DicZ8XTR",token="AdOZrFlyIrXLzbAJeN5Lzts")
 
