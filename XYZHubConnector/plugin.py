@@ -20,7 +20,6 @@ from qgis.PyQt.QtWidgets import QAction, QToolButton, QWidgetAction
 from qgis.PyQt.QtWidgets import QProgressBar, QSizePolicy
 
 from . import config
-from . import utils
 
 from .gui.space_dialog import MainDialog
 from .gui.space_info_dialog import EditSpaceDialog
@@ -49,6 +48,7 @@ from .xyz_qgis.common.secret import Secret
 from .xyz_qgis.basemap.auth_manager import AuthManager
 
 from .xyz_qgis.common.error import format_traceback
+from .xyz_qgis.common import utils
 
 PLUGIN_NAME = config.PLUGIN_NAME
 
@@ -67,7 +67,7 @@ class XYZHubConnector(object):
         import sys
         print(sys.version)
         self.iface = iface
-        self.web_menu = "&XYZ Hub Connector"
+        self.web_menu = "&{name}".format(name=config.PLUGIN_FULL_NAME)
         self.hasGuiInitialized = False
         self.init_modules()
         self.obj = self
@@ -104,7 +104,7 @@ class XYZHubConnector(object):
 
         ######## Add the toolbar + button
         self.toolbar = self.iface.addToolBar(PLUGIN_NAME)
-        self.toolbar.setObjectName("XYZ Hub Connector")
+        self.toolbar.setObjectName(config.PLUGIN_FULL_NAME)
 
         self.actions_menu = [self.action_connect, self.action_sync_edit, self.action_clear_cache] 
 
