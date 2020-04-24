@@ -17,11 +17,18 @@ from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt.QtNetwork import QNetworkRequest
 from qgis.PyQt.QtCore import QVariant
 from qgis.PyQt.QtCore import QBuffer, QByteArray
+from qgis.PyQt.QtCore import QT_VERSION_STR
+from qgis.PyQt.Qt import PYQT_VERSION_STR
+from qgis.core import Qgis
+import platform
+from ..common import config
 
 API_CIT_URL = "https://xyz.cit.api.here.com/hub"
 API_PRD_URL = "https://xyz.api.here.com/hub"
 API_SIT_URL = "https://xyz.sit.cpdev.aws.in.here.com/hub"
 API_URL = dict(PRD=API_PRD_URL, CIT=API_CIT_URL, SIT=API_SIT_URL)
+
+USER_AGENT = "xyz-qgis-plugin/{plugin_version} ({os}; {machine}) QGIS/{qgis_version} Python/{py_version} Qt/{qt_version} PyQt/{pyqt_version}".format(plugin_version=config.PLUGIN_VERSION, os=platform.platform(), machine=platform.machine(), qgis_version=Qgis.QGIS_VERSION, py_version=platform.python_version(), qt_version=QT_VERSION_STR, pyqt_version=PYQT_VERSION_STR)
 
 from ..common.signal import make_print_qgis
 print_qgis = make_print_qgis("net_utils")
@@ -43,7 +50,8 @@ def _make_headers(token, **params):
     h = {
         "Authorization": "Bearer %s"% token,
         "Accept" : "*/*",
-        "Accept-Encoding": "gzip"
+        "Accept-Encoding": "gzip",
+        "User-Agent": USER_AGENT
     }
     h.update(params)
     return h
