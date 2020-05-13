@@ -179,7 +179,7 @@ class LoadLayerController(BaseLoader):
         # feat_cnt = len(obj["features"])
         # total_cnt = self.get_feat_cnt()
         if "handle" in obj:
-            handle = int(obj["handle"])
+            handle = obj["handle"]
             if not self.params_queue.has_next():
                 self.params_queue.gen_params(handle=handle)
         else:

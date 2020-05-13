@@ -11,6 +11,10 @@
 from collections import deque
 from . import bbox_utils
 from typing import Iterable
+
+class InvalidParamsError(Exception): 
+    pass
+
 class ParamsQueue(object):
     """ queue: (limit=1, handle=0), (lim1, handle1), ..
     if response error, retry with smaller limit from h0 to h1
@@ -75,13 +79,14 @@ class DequeParamsQueue(ParamsQueue):
 
 class ParamsQueue_deque_v1(ParamsQueue):
     """ queue: (limit=1, handle=0), (lim1, handle1), ..
-    if response error, retry with smaller limit from h0 to h1
+    The parameter handle is integer. 
+    If response error, retry with smaller limit from h0 to h1. 
     """
     def __init__(self, params, buffer_size=1):
         self._buffer_size = buffer_size
         self.retries = 0
         self.limit = params.get("limit",1)
-        self.handle = params.get("handle",0)
+        self.handle = int(params.get("handle",0))
         self._queue = deque([dict(limit=self.limit, handle=self.handle)])
         self.handle += self.limit
     def gen_params(self, buffer_size=None):
@@ -116,28 +121,36 @@ class ParamsQueue_deque_v1(ParamsQueue):
         params = self._queue.popleft()
         return params
 
-class ParamsQueue_deque_v2(ParamsQueue_deque_v1):
+class ParamsQueue_deque_v2(ParamsQueue):
     """ queue: (limit=1), (lim1, handle1), ..
-    The parameter limit must be between 1 and 100000. (API 21.01.2019)
+    The parameter limit must be between 1 and 100000. (API 21.01.2019).
+    The parameter handle is string. 
     if response error, retry with the same request
     """
     def __init__(self, params, buffer_size=1):
         self._buffer_size = buffer_size
         self.retries = 0
         self.limit = params.get("limit",1)
-        self.handle = params.get("handle",0)
+        self.handle = None
         self._queue = deque([dict(limit=self.limit)])
-        self.handle += self.limit
     def gen_params(self, handle=None):
+        if handle is None: return
+        if handle == self.handle: 
+            raise InvalidParamsError("Duplicated handle found in response: %s"%handle)
+        self.handle = handle
         limit = self.limit
-        if handle is None:
-            handle = self.handle
         self._queue.append(dict(limit=limit, handle=handle))
-        self.handle = max(self.handle, handle)
     def gen_retry_params(self, **params):
-        lst_retry = [params]
-        self._queue.extendleft(reversed(lst_retry))
-        self.retries += len(lst_retry)
+        self._queue.appendleft(params)
+        self.retries += 1
+    def has_retry(self):
+        return self.retries        
+    def has_next(self):
+        return len(self._queue) > 0
+    def get_params(self):
+        self.retries = max(0, self.retries-1)
+        params = self._queue.popleft()
+        return params
 
 class ParamsQueue_deque_bbox(ParamsQueue_deque_v2):
     def __init__(self, params, buffer_size=1):
