@@ -15,6 +15,7 @@ from ...xyz_qgis.models import SpaceConnectionInfo
 from ...xyz_qgis.models.token_model import GroupTokenModel, ComboBoxProxyModel
 from ...xyz_qgis.controller import make_qt_args
 from ..token_dialog import TokenDialog
+from ..server_dialog import ServerDialog
 from ..util_dialog import ConfirmDialog
 from .ux import UXDecorator
 from qgis.PyQt.QtGui import QStandardItemModel, QStandardItem
@@ -48,10 +49,12 @@ class TokenUX(ServerUX):
         self.comboBox_token = None
         self.btn_use = None
         self.btn_token = None
+        self.btn_server = None
+        self.comboBox_server_url = None
         self.comboBox_server = None
         self.conn_info = None
         #
-    def config(self, token_model: GroupTokenModel):
+    def config(self, token_model: GroupTokenModel, server_model):
         self.conn_info = SpaceConnectionInfo()
 
         self.token_model = token_model
@@ -61,9 +64,19 @@ class TokenUX(ServerUX):
         proxy_model.setSourceModel( token_model)
         proxy_model.set_keys(token_model.INFO_KEYS)
 
+        
+        proxy_server_model = ComboBoxProxyModel(token_key="server", noname_token="")
+        proxy_server_model.setSourceModel( server_model)
+        proxy_server_model.set_keys(server_model.INFO_KEYS)
+
         self.comboBox_token.setModel( proxy_model)
         self.comboBox_token.setInsertPolicy(self.comboBox_token.NoInsert)
         self.comboBox_token.setDuplicatesEnabled(False)
+        
+        self.comboBox_server_url.setModel( proxy_server_model)
+        self.comboBox_server_url.setInsertPolicy(self.comboBox_server_url.NoInsert)
+        self.comboBox_server_url.setDuplicatesEnabled(False)
+
 
         self.comboBox_server.currentIndexChanged[str].connect(token_model.set_server)
         self.comboBox_server.currentIndexChanged[str].connect(self.set_server)
@@ -75,12 +88,16 @@ class TokenUX(ServerUX):
         self.token_dialog = TokenDialog(self)
         self.token_dialog.config(token_model)
 
+        self.server_dialog = ServerDialog(self)
+        self.server_dialog.config(server_model)
+
         # self.comboBox_token.currentIndexChanged[int].connect(self.cb_comboxBox_token_selected)
         self.comboBox_token.currentIndexChanged[int].connect(self.ui_valid_input)
         # self.comboBox_token.editTextChanged.connect(self.ui_valid_input)
 
         self.btn_use.clicked.connect(self.cb_token_used)
         self.btn_token.clicked.connect(self.open_token_dialog)
+        self.btn_server.clicked.connect(self.open_server_dialog)
 
         self.comboBox_token.setCurrentIndex(0)
         self.ui_valid_input() # valid_input initially (explicit)
@@ -92,6 +109,14 @@ class TokenUX(ServerUX):
         idx = self.token_dialog.current_idx
         self.comboBox_token.setCurrentIndex(idx)
         return self.token_dialog.is_used_token_changed
+        
+    def open_server_dialog(self):
+        idx = self.comboBox_server_url.currentIndex()
+        self.server_dialog.set_current_idx(idx)
+        self.server_dialog.exec_()
+        idx = self.server_dialog.current_idx
+        self.comboBox_server_url.setCurrentIndex(idx)
+        return self.server_dialog.is_used_token_changed
 
     def set_server(self,server):
         self.conn_info.set_server(server)
@@ -102,7 +127,7 @@ class TokenUX(ServerUX):
         return proxy_model.get_token(self.comboBox_token.currentIndex())
     def cb_enable_token_ui(self,flag=True):
         txt_clicked = "Checking.."
-        txt0 = "Use"
+        txt0 = "Connect"
         if not flag:
             self.btn_use.setText(txt_clicked)
         elif self.btn_use.text() == txt_clicked:
@@ -136,6 +161,6 @@ class TokenUX(ServerUX):
             idx != self.token_model.get_invalid_token_idx()
             and idx == self.token_model.get_used_token_idx()
         )
-        txt = "Ok!" if flag else "Use"
+        txt = "Ok!" if flag else "Connect"
         self.btn_use.setText(txt)
         return flag

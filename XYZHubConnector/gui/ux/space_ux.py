@@ -24,7 +24,7 @@ class SpaceUX(TokenUX):
         # these are like abstract variables
         self.tableView_space = None
         
-    def config(self, token_model):
+    def config(self, token_model, server_model):
         
         space_model = XYZSpaceModel(self)
 
@@ -39,7 +39,7 @@ class SpaceUX(TokenUX):
         self.tableView_space.pressed.connect(self.cb_table_row_selected)
         
         self.btn_use.clicked.connect(self._get_space_model().reset)
-        TokenUX.config(self,token_model)
+        TokenUX.config(self,token_model,server_model)
 
     def _get_proxy_model(self):
         return self.tableView_space.model()
@@ -52,6 +52,14 @@ class SpaceUX(TokenUX):
     def open_token_dialog(self):
         is_used_token_changed = super().open_token_dialog()
         if not is_used_token_changed: return
+
+        self._get_space_model().reset()
+        self.token_model.reset_used_token_idx()
+        self.ui_valid_input()
+
+    def open_server_dialog(self):
+        is_used_server_changed = super().open_server_dialog()
+        if not is_used_server_changed: return
 
         self._get_space_model().reset()
         self.token_model.reset_used_token_idx()
