@@ -180,21 +180,23 @@ class GroupTokenInfoModel(GroupTokenModel):
         infos = line.split(self.DELIM,maxsplit=1)
         return dict(zip(self.SERIALIZE_KEYS, infos))
 
-    def serialize_token_info(self, row):
-        token_info = self.get_token_info(row)
+    def serialize_token_row(self, row):
+        return self.serialize_token_info(self.get_token_info(row))
+
+    def serialize_token_info(self, token_info):
         lst_txt = [token_info.get(k,"") for k in self.SERIALIZE_KEYS]
         return self.DELIM.join(lst_txt)
 
     def _cb_remove_token_from_file(self, root, i0, i1):
         if not self._is_valid_single_selection(i0, i1): return # do not write multiple added items appendRows
-        token = self.serialize_token_info(i0)
+        token = self.serialize_token_row(i0)
         if self.token_groups.has_option(self.server, token):
             self.token_groups.remove_option(self.server, token)
             self._write_to_file()
         
     def _cb_append_token_to_file(self, root, i0, i1):
         if not self._is_valid_single_selection(i0, i1): return # do not write multiple added items appendRows
-        token = self.serialize_token_info(i0)
+        token = self.serialize_token_row(i0)
         if not self.token_groups.has_option(self.server, token):
             self.token_groups.set(self.server, token)
             self._write_to_file()
@@ -233,14 +235,14 @@ class EditableGroupTokenInfoModel(GroupTokenInfoModel):
 
     def _cb_append_token_to_file(self, root, i0, i1):
         if not self._is_valid_single_selection(i0, i1): return
-        token = self.serialize_token_info(i0)
+        token = self.serialize_token_row(i0)
         self.cache_tokens.insert(i0,token)
 
     def _cb_changed_token_to_file(self, idx_top_left, idx_bot_right):
         i0 = idx_top_left.row()
         i1 = idx_bot_right.row()
         if not self._is_valid_single_selection(i0, i1): return
-        token = self.serialize_token_info(i0)
+        token = self.serialize_token_row(i0)
         self.cache_tokens[i0] = token
 
     def _is_valid_single_selection(self, i0, i1):
@@ -248,13 +250,51 @@ class EditableGroupTokenInfoModel(GroupTokenInfoModel):
         """
         return i0 == i1
 
+class EditableGroupTokenInfoWithServerModel(EditableGroupTokenInfoModel):
+    INFO_KEYS = ["name","server"]
+    SERIALIZE_KEYS = ["server","name"]
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.server="servers"
+        self.set_server = lambda a: None
+        
+    def _refresh_token(self):
+        self.cache_tokens = list()
+        servers = self.token_groups.options(self.server)
+        self.clear()
+        
+        self.setHorizontalHeaderLabels(self.INFO_KEYS)
+        it = self.invisibleRootItem()
+
+        for line in servers:
+            if not line: continue
+            server_info = self.deserialize_line(line)
+            if not server_info.get("server"): continue
+            it.appendRow([QStandardItem(t)  
+                for t in self.items_from_token_info(
+                    server_info
+                )
+            ])
+    def _load_ini(self, ini):
+        super()._load_ini(ini)
+        tokens = self.token_groups.options(self.server)
+        if not tokens:
+            self.token_groups.set(self.server, self.serialize_token_info(dict(name="PRD", server="PRD")))
+
+        if not self.token_groups.has_section(self.server):
+            self.token_groups.add_section(self.server)
+
 class ComboBoxProxyModel(QIdentityProxyModel):
+    def __init__(self, token_key="token", noname_token="<noname token>"):
+        super().__init__()
+        self.token_key = token_key
+        self.noname_token = noname_token
     def set_keys(self, keys):
         """ set header keys
         """
         self.keys = keys
         self.col_name = self.get_key_index("name")
-        self.col_token = self.get_key_index("token")
+        self.col_token = self.get_key_index(self.token_key)
     def get_key_index(self, key):
         return self.keys.index(key)
     def get_value(self, row, col, role):
@@ -270,6 +310,6 @@ class ComboBoxProxyModel(QIdentityProxyModel):
             name = self.get_text(index.row(), self.col_name)
             token = self.get_text(index.row(), self.col_token)
             if token:
-                msg = name if name else "<noname token> %s"%token
+                msg = name if name else "%s %s"%(self.noname_token,token)
                 return QVariant(msg)
         return val
