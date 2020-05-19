@@ -143,10 +143,14 @@ class GroupTokenModel(TokenModel):
 class GroupTokenInfoModel(GroupTokenModel):
     INFO_KEYS = ["name","token"]
     SERIALIZE_KEYS = ["token","name"]
+    TOKEN_KEY = "token"
     DELIM = ","
     
     def _refresh_token(self):
-        tokens = self.token_groups.options(self.server)
+        s = self.server
+        if not self.token_groups.has_section(s):
+            self.token_groups.add_section(s)
+        tokens = self.token_groups.options(s)
         self.clear()
         
         self.setHorizontalHeaderLabels(self.INFO_KEYS)
@@ -156,12 +160,19 @@ class GroupTokenInfoModel(GroupTokenModel):
         for line in tokens:
             if not line: continue
             token_info = self.deserialize_line(line)
-            if not token_info.get("token"): continue
+            if not token_info.get(self.TOKEN_KEY): continue
             it.appendRow([QStandardItem(t)  
                 for t in self.items_from_token_info(
                     token_info
                 )
             ])
+    def _load_ini(self, ini):
+        token_groups = configparser.ConfigParser(allow_no_value=True,delimiters=("*",))
+        token_groups.optionxform = str
+        with open(ini,"a+") as f:
+            f.seek(0)
+            token_groups.read_file(f)
+        self.token_groups = token_groups
 
     def get_text(self, row, col):
         it = self.item(row, col)
@@ -253,42 +264,48 @@ class EditableGroupTokenInfoModel(GroupTokenInfoModel):
 class EditableGroupTokenInfoWithServerModel(EditableGroupTokenInfoModel):
     INFO_KEYS = ["name","server"]
     SERIALIZE_KEYS = ["server","name"]
+    TOKEN_KEY = "server"
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.server="servers"
         self.set_server = lambda a: None
-        
-    def _refresh_token(self):
-        self.cache_tokens = list()
-        servers = self.token_groups.options(self.server)
-        self.clear()
-        
-        self.setHorizontalHeaderLabels(self.INFO_KEYS)
-        it = self.invisibleRootItem()
+    
+    def set_default_servers(self, default_api_urls):
+        self.default_api_urls = default_api_urls
+        self.default_api_envs = {v:k for k, v in default_api_urls.items()}
+        self._init_default_servers([
+            dict(name="HERE Server", server=default_api_urls["PRD"])
+        ])
 
-        for line in servers:
-            if not line: continue
-            server_info = self.deserialize_line(line)
-            if not server_info.get("server"): continue
-            it.appendRow([QStandardItem(t)  
+    def _init_default_servers(self, server_infos: list):
+        tokens = self.token_groups.options(self.server)
+        existing_server = dict([
+            (self.deserialize_line(token)["name"], idx)
+            for idx, token in enumerate(tokens)
+        ])
+        # if tokens: return
+        it = self.invisibleRootItem()
+        for i, server_info in enumerate(server_infos):
+            # if self.token_groups.has_option(self.server, self.serialize_token_info(server_info)):
+            #     continue
+            idx = existing_server.get(server_info["name"])
+            if idx is not None:
+                it.removeRow(idx)
+            it.insertRow(i,[QStandardItem(t)
                 for t in self.items_from_token_info(
                     server_info
                 )
             ])
-    def _load_ini(self, ini):
-        super()._load_ini(ini)
-        tokens = self.token_groups.options(self.server)
-        if not tokens:
-            self.token_groups.set(self.server, self.serialize_token_info(dict(name="PRD", server="PRD")))
+        self.cb_write_token()
 
-        if not self.token_groups.has_section(self.server):
-            self.token_groups.add_section(self.server)
 
 class ComboBoxProxyModel(QIdentityProxyModel):
-    def __init__(self, token_key="token", noname_token="<noname token>"):
+    def __init__(self, token_key="token", named_token="{name}", nonamed_token="<noname token> {token}"):
         super().__init__()
         self.token_key = token_key
-        self.noname_token = noname_token
+        self.named_token = named_token
+        self.nonamed_token = nonamed_token
     def set_keys(self, keys):
         """ set header keys
         """
@@ -310,6 +327,6 @@ class ComboBoxProxyModel(QIdentityProxyModel):
             name = self.get_text(index.row(), self.col_name)
             token = self.get_text(index.row(), self.col_token)
             if token:
-                msg = name if name else "%s %s"%(self.noname_token,token)
+                msg = self.named_token.format(name=name, token=token) if name else self.nonamed_token.format(token=token)
                 return QVariant(msg)
         return val

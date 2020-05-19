@@ -63,9 +63,8 @@ class TokenUX(ServerUX):
         proxy_model = ComboBoxProxyModel()
         proxy_model.setSourceModel( token_model)
         proxy_model.set_keys(token_model.INFO_KEYS)
-
         
-        proxy_server_model = ComboBoxProxyModel(token_key="server", noname_token="")
+        proxy_server_model = ComboBoxProxyModel(token_key="server", nonamed_token="")
         proxy_server_model.setSourceModel( server_model)
         proxy_server_model.set_keys(server_model.INFO_KEYS)
 

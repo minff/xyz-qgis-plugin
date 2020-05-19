@@ -41,7 +41,7 @@ from .xyz_qgis.layer import tile_utils, XYZLayer
 from .xyz_qgis.layer.layer_props import QProps
 
 
-from .xyz_qgis.network import NetManager, net_handler
+from .xyz_qgis.network import NetManager, net_handler, net_utils
 
 from .xyz_qgis import basemap
 from .xyz_qgis.common.secret import Secret
@@ -184,6 +184,7 @@ class XYZHubConnector(object):
         ######## token      
         self.token_model.load_ini(config.USER_PLUGIN_DIR +"/token.ini")
         self.server_model.load_ini(config.USER_PLUGIN_DIR +"/token.ini")
+        self.server_model.set_default_servers(net_utils.API_URL)
 
         ######## CALLBACK
         
