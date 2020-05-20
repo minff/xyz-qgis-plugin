@@ -89,11 +89,11 @@ import configparser
 class GroupTokenModel(TokenModel):
     """ Server-group token model, in sync with a ini config file (with sections)
     """
-    SERVERS = [SpaceConnectionInfo.PRD, SpaceConnectionInfo.CIT, SpaceConnectionInfo.SIT]
+    SERVERS = ["PRD"]
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.server = SpaceConnectionInfo.PRD
+        self.server = "PRD"
         
     def set_server(self, server):
         self.server = server

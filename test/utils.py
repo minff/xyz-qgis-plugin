@@ -285,12 +285,11 @@ def load_token_space_file(fname):
 TOKEN_SPACE_MAP = load_token_space_file("token_space.json")
 
 def get_token_space(key):
-    return TOKEN_SPACE_MAP.get(key, [None, None])
+    return TOKEN_SPACE_MAP.get(key, [None, None, None])
 
 def get_conn_info(key):
     conn_info = SpaceConnectionInfo()
     token, space_id, server = get_token_space(key)
     if token is not None:
-        conn_info.set_(token=token,space_id=space_id)
-        conn_info.set_server(server)
+        conn_info.set_(token=token,space_id=space_id,server=server)
     return conn_info

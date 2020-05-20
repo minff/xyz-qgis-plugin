@@ -112,7 +112,7 @@ def make_conn_request(conn_info, endpoint, req_type="normal", **kw):
 
     """
     token, space_id = conn_info.get_xyz_space()
-    api_url = API_URL[conn_info.server]
+    api_url = conn_info.get_("server", API_URL["PRD"]).rstrip("/")
     url = api_url + endpoint.format(space_id=space_id)
     url = make_query_url(url, **kw)
     header = HEADER_EXTRA_MAP.get(req_type,dict())
