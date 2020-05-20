@@ -50,7 +50,7 @@ class UploadUX(SpaceUX):
     def start_upload(self):
         index = self._get_current_index()
         meta = self._get_space_model().get_(dict, index)
-        self.conn_info.set_(**meta, token=self.get_input_token())
+        self.conn_info.set_(**meta, token=self.get_input_token(), server=self.get_input_server())
 
         tags = process_tags(self.lineEdit_tags_upload.text().strip())
         kw = dict(tags=tags) if len(tags) else dict()

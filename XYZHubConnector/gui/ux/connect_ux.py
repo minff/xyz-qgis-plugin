@@ -127,7 +127,7 @@ class ConnectUX(SpaceUX):
     def start_connect(self):
         index = self._get_current_index()
         meta = self._get_space_model().get_(dict, index)
-        self.conn_info.set_(**meta, token=self.get_input_token())
+        self.conn_info.set_(**meta, token=self.get_input_token(), server=self.get_input_server())
         conn_info = SpaceConnectionInfo(self.conn_info)
         self.signal_space_connect.emit( make_qt_args(conn_info, meta, **self.get_params() ))
 

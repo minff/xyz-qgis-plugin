@@ -76,10 +76,11 @@ class TokenUX(ServerUX):
         self.comboBox_server_url.setInsertPolicy(self.comboBox_server_url.NoInsert)
         self.comboBox_server_url.setDuplicatesEnabled(False)
 
+        # self.comboBox_server.currentIndexChanged[str].connect(self.set_server)
+        # self.comboBox_server.currentIndexChanged[str].connect(self.ui_valid_input)
 
-        self.comboBox_server.currentIndexChanged[str].connect(token_model.set_server)
-        self.comboBox_server.currentIndexChanged[str].connect(self.set_server)
-        self.comboBox_server.currentIndexChanged[str].connect(self.ui_valid_input)
+        self.comboBox_server_url.currentIndexChanged[int].connect(self.cb_comboxBox_server_selected)
+        self.comboBox_server_url.currentIndexChanged[int].connect(self.ui_valid_input)
 
         token_model.set_server(self.comboBox_server.currentText())
         self.conn_info.set_server(self.comboBox_server.currentText())
@@ -118,12 +119,21 @@ class TokenUX(ServerUX):
         return self.server_dialog.is_used_token_changed
 
     def set_server(self,server):
+        self.token_model.set_server(server)
         self.conn_info.set_server(server)
         self.token_model.reset_used_token_idx()
-
+        
     def get_input_token(self):
         proxy_model = self.comboBox_token.model()
         return proxy_model.get_token(self.comboBox_token.currentIndex())
+    def get_input_server(self):
+        proxy_server_model = self.comboBox_server_url.model()
+        return proxy_server_model.get_token(self.comboBox_server_url.currentIndex())
+
+    def cb_comboxBox_server_selected(self, index):
+        server = self.comboBox_server_url.model().get_token(index)
+        self.set_server(server)
+
     def cb_enable_token_ui(self,flag=True):
         txt_clicked = "Checking.."
         txt0 = "Connect"
@@ -136,16 +146,19 @@ class TokenUX(ServerUX):
         self.comboBox_token.setEnabled(flag)
     def cb_token_used(self):
         token = self.get_input_token()
-        if len(token) == 0: 
+        server = self.get_input_server()
+        if not token or not server: 
             return
         # disable button
         self.cb_enable_token_ui(False)
         # gui -> pending token
         self.token_model.set_used_token_idx(self.comboBox_token.currentIndex())
-        self.conn_info.set_(token=token)
+        # emit
+        self.conn_info.set_(token=token, server=server)
         conn_info = SpaceConnectionInfo(self.conn_info)
         self.signal_use_token.emit( make_qt_args(conn_info) )
     def cb_comboxBox_token_selected(self, index):
+        # DEPRECATED
         flag_edit = True if index == 0 else False
         self.comboBox_token.setEditable(flag_edit)
 
