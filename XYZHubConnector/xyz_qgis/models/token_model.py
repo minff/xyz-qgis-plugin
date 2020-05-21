@@ -289,18 +289,22 @@ class EditableGroupTokenInfoWithServerModel(EditableGroupTokenInfoModel):
 
     def _init_default_servers(self, server_infos: list):
         tokens = self.token_groups.options(self.server)
-        existing_server = dict([
-            (self.deserialize_line(token)["name"], idx)
-            for idx, token in enumerate(tokens)
-        ])
         # if tokens: return
+        existing_server = dict()
+        for idx, token in enumerate(tokens):
+            existing_server.setdefault(self.deserialize_line(token)["server"], list()).append(idx)
+        
         it = self.invisibleRootItem()
+        # remove existing default server
+        removed_idx = sorted(sum((
+            existing_server.get(sv, list())
+            for server_info in server_infos
+            for sv in server_info.pop("old_servers", list()) + [server_info["server"]]
+            ), list()), reverse=True)
+        for idx in removed_idx:
+            it.removeRow(idx)
+        # add default server
         for i, server_info in enumerate(server_infos):
-            # if self.token_groups.has_option(self.server, self.serialize_token_info(server_info)):
-            #     continue
-            idx = existing_server.get(server_info["name"])
-            if idx is not None:
-                it.removeRow(idx)
             it.insertRow(i,[QStandardItem(t)
                 for t in self.items_from_token_info(
                     server_info
