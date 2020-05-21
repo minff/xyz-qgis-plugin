@@ -23,7 +23,7 @@ class SpaceConnectionInfo(object):
         obj.set_(**kw)
         return obj
     def set_(self, **kw):
-        kw = {k:v.strip() for k, v in kw.items()}
+        kw = {k:v.strip() if isinstance(v, str) else v for k, v in kw.items()}
         if "id" in kw:
             kw["space_id"] = kw.pop("id")
         self.obj.update(kw)
