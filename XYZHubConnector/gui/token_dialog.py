@@ -19,7 +19,11 @@ from qgis.PyQt.QtGui import QStandardItem
 TokenUI = get_ui_class('token_dialog.ui')
 
 class TokenDialog(QDialog, TokenUI):
-    title="Token Manager"
+    title = "Token Manager"
+    token_info_keys = ["name", "token"]
+    NewInfoDialog = NewTokenInfoDialog
+    EditInfoDialog = EditTokenInfoDialog
+    
     def __init__(self, parent=None):
         """init window"""
         QDialog.__init__(self, parent)
@@ -79,15 +83,19 @@ class TokenDialog(QDialog, TokenUI):
         row = self.tableView.currentIndex().row()
         return self.token_model.get_token_info(row)
 
+    def _make_delete_message(self, token_info):
+        token_msg = ", ".join("%s: %s"%it for it in token_info.items())
+        return "Do you want to Delete token (%s)?"%token_msg
+        
     def ui_add_token(self):
-        dialog = NewTokenInfoDialog(self)
+        dialog = self.NewInfoDialog(self)
         dialog.accepted.connect(lambda: self._add_token(
             dialog.get_info()
         ))
         dialog.exec_()
 
     def ui_edit_token(self):
-        dialog = EditTokenInfoDialog(self)
+        dialog = self.EditInfoDialog(self)
         token_info = self._get_current_token_info()
         dialog.set_info(token_info)
         dialog.accepted.connect(lambda: self._edit_token(
@@ -98,8 +106,7 @@ class TokenDialog(QDialog, TokenUI):
     def ui_delete_token(self):
         row = self.tableView.currentIndex().row()
         token_info = self.token_model.get_token_info(row)
-        token_msg = ", ".join("%s: %s"%it for it in token_info.items())
-        dialog = ConfirmDialog("Do you want to Delete token (%s)?"%token_msg)
+        dialog = ConfirmDialog(self._make_delete_message(token_info))
         ret = dialog.exec_()
         if ret != dialog.Ok: return
 
@@ -129,14 +136,14 @@ class TokenDialog(QDialog, TokenUI):
     def _add_token(self, token_info: dict):
         self.token_model.appendRow([
             QStandardItem(token_info[k])
-            for k in ["name", "token"]
+            for k in self.token_info_keys
         ])
     
     def _edit_token(self, token_info: dict):
         row = self.tableView.currentIndex().row()
         self.token_model.insertRow(row+1, [
             QStandardItem(token_info[k])
-            for k in ["name", "token"]
+            for k in self.token_info_keys
         ])
         it = self.token_model.takeRow(row)
         self.check_used_token_changed(row)
