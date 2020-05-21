@@ -82,16 +82,16 @@ class TokenDialog(QDialog, TokenUI):
     def ui_add_token(self):
         dialog = NewTokenInfoDialog(self)
         dialog.accepted.connect(lambda: self._add_token(
-            dialog.get_token_info()
+            dialog.get_info()
         ))
         dialog.exec_()
 
     def ui_edit_token(self):
         dialog = EditTokenInfoDialog(self)
         token_info = self._get_current_token_info()
-        dialog.set_token_info(token_info)
+        dialog.set_info(token_info)
         dialog.accepted.connect(lambda: self._edit_token(
-            dialog.get_token_info()
+            dialog.get_info()
         ))
         dialog.exec_()
 

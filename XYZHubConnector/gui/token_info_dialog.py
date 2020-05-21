@@ -37,13 +37,13 @@ class NameValueDialog(QDialog, TokenEditUI):
 
 class TokenInfoDialog(NameValueDialog):
     txt_value="Token"
-    def get_token_info(self):
+    def get_info(self):
         d = {
             "name": self.lineEdit_name.text(),
             "token": self.lineEdit_token.text(),
         }
         return d
-    def set_token_info(self, token_info):
+    def set_info(self, token_info):
         self.lineEdit_name.setText(token_info.get("name",""))
         self.lineEdit_token.setText(token_info.get("token",""))
         
@@ -55,18 +55,18 @@ class EditTokenInfoDialog(TokenInfoDialog):
 
 class ServerInfoDialog(NameValueDialog):
     txt_value="Server"
-    def get_server_info(self):
+    def get_info(self):
         d = {
             "name": self.lineEdit_name.text(),
             "server": self.lineEdit_token.text(),
         }
         return d
-    def set_server_info(self, token_info):
+    def set_info(self, token_info):
         self.lineEdit_name.setText(token_info.get("name",""))
         self.lineEdit_token.setText(token_info.get("server",""))
         
-class NewServerInfoDialog(TokenInfoDialog):
+class NewServerInfoDialog(ServerInfoDialog):
     title = "Add new server"
     
-class EditServerInfoDialog(TokenInfoDialog):
+class EditServerInfoDialog(ServerInfoDialog):
     title = "Edit server"
