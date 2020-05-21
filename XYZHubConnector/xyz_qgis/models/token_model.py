@@ -295,16 +295,19 @@ class EditableGroupTokenInfoWithServerModel(EditableGroupTokenInfoModel):
             existing_server.setdefault(self.deserialize_line(token)["server"], list()).append(idx)
         
         it = self.invisibleRootItem()
-        # remove existing default server
-        removed_idx = sorted(sum((
-            existing_server.get(sv, list())
-            for server_info in server_infos
-            for sv in server_info.pop("old_servers", list()) + [server_info["server"]]
-            ), list()), reverse=True)
-        for idx in removed_idx:
-            it.removeRow(idx)
+        
+        # # remove existing default server
+        # removed_idx = sorted(sum((
+        #     existing_server.get(sv, list())
+        #     for server_info in server_infos
+        #     for sv in server_info.pop("old_servers", list()) + [server_info["server"]]
+        #     ), list()), reverse=True)
+        # for idx in removed_idx:
+        #     it.removeRow(idx)
+
         # add default server
         for i, server_info in enumerate(server_infos):
+            if server_info["server"] in existing_server: continue
             it.insertRow(i,[QStandardItem(t)
                 for t in self.items_from_token_info(
                     server_info
