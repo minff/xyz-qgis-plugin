@@ -25,6 +25,9 @@
         <property name="text">
          <string>Add</string>
         </property>
+        <property name="default">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item>
