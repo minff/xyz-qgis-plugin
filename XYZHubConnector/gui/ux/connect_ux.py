@@ -14,7 +14,7 @@ from qgis.PyQt.QtGui import QRegExpValidator, QIntValidator
 from ...xyz_qgis.controller import make_qt_args
 from ...xyz_qgis.models import LOADING_MODES
 from .space_ux import SpaceUX, SpaceConnectionInfo
-from .ux import process_tags
+from .ux import strip_list_string
 
 
 class ConnectUX(SpaceUX):
@@ -98,7 +98,7 @@ class ConnectUX(SpaceUX):
     def get_params(self):
         key = ["tags","limit","max_feat","similarity_threshold","similarity_mode","loading_mode"]
         val = [
-            process_tags(self.lineEdit_tags.text().strip()),
+            strip_list_string(self.lineEdit_tags.text().strip()),
             self.lineEdit_limit.text().strip(),
             self.lineEdit_max_feat.text().strip(),
             self.comboBox_similarity_threshold.currentData(),
