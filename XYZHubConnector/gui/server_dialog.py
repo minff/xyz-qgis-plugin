@@ -60,7 +60,7 @@ class ServerDialog(QDialog, TokenUI):
         if ret == self.Accepted:
             self.is_used_token_changed = True
             idx = self.tableView.currentIndex().row()
-            self.set_current_idx(idx)
+            if idx >= 0: self.set_current_idx(idx)
         return ret
     def set_current_idx(self,idx):
         self.current_idx = idx
