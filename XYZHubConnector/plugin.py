@@ -184,6 +184,7 @@ class XYZHubConnector(object):
         ######## token      
         self.token_model.load_ini(config.USER_PLUGIN_DIR +"/token.ini")
         self.server_model.load_ini(config.USER_PLUGIN_DIR +"/token.ini")
+        self.token_model.set_default_servers(net_utils.API_URL)
         self.server_model.set_default_servers(net_utils.API_URL)
 
         ######## CALLBACK

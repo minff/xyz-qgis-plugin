@@ -146,6 +146,15 @@ class GroupTokenInfoModel(GroupTokenModel):
     TOKEN_KEY = "token"
     DELIM = ","
     
+    def set_default_servers(self, default_api_urls):
+        self.default_api_urls = default_api_urls
+        self.default_api_envs = {v:k for k, v in default_api_urls.items()}
+
+    def set_server(self, server):
+        # TODO default_api_envs not guaranteed to be init
+        self.server = self.default_api_envs.get(server, server)
+        self._refresh_token()
+
     def _refresh_token(self):
         s = self.server
         if not self.token_groups.has_section(s):
