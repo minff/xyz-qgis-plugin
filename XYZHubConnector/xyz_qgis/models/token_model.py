@@ -12,6 +12,9 @@
 from qgis.PyQt.QtGui import QStandardItemModel, QStandardItem
 from qgis.PyQt.QtCore import QIdentityProxyModel, Qt, QVariant
 
+from .connection import SpaceConnectionInfo
+import configparser
+
 class UsedToken():
     def __init__(self):
         self.set_invalid_token_idx(0)
@@ -27,14 +30,21 @@ class UsedToken():
     def reset_used_token_idx(self):
         self.used_token_idx = self.invalid_idx
 
-class TokenModel(QStandardItemModel, UsedToken):
-    """ Simple version of token model, in sync with a simple line config file
+class EditableGroupTokenInfoModel(QStandardItemModel, UsedToken):
+    """ Grouped Token Model, Cached changes and write to file at the end
     """
+    INFO_KEYS = ["name","token"]
+    SERIALIZE_KEYS = ["token","name"]
+    TOKEN_KEY = "token"
+    DELIM = ","
+
     def __init__(self, parent=None):
         super().__init__(parent)
         UsedToken.__init__(self)
         self.ini = ""
-        self._config_callback() # persistant_cange (Experimental)
+        self._config_callback() # persistent
+        self.group_key = "PRD"
+
     def load_ini(self, ini):
         self._load_ini(ini)
         self.ini = ini # must be after loaded
@@ -43,108 +53,12 @@ class TokenModel(QStandardItemModel, UsedToken):
     def get_ini(self):
         return self.ini
     
-    def _refresh_token(self):
-        pass
-
-    def _load_ini(self, ini):
-        it = self.invisibleRootItem()
-        it.appendRow(QStandardItem())
-        with open(ini) as f:
-            it.appendRows([
-                QStandardItem(line.strip()) for line in f.readlines()
-                if len(line.strip()) > 0
-                ])
-    def _config_callback(self):
-        try: self.rowsInserted.disconnect()
-        except TypeError: pass
-        try: self.rowsAboutToBeRemoved.disconnect()
-        except TypeError: pass
-
-        self.rowsInserted.connect(self._cb_append_token_to_file)
-
-        # persistent remove (uncomment next line)
-        self.rowsAboutToBeRemoved.connect(self._cb_remove_token_from_file)
-    def _cb_remove_token_from_file(self, root, i0, i1):
-        if self.ini == ""  or not self._is_valid_single_selection(i0, i1): return # do not write multiple added items appendRows
-        token = self.item(i0).text()
-        with open(self.ini,"r+") as f:
-            new_lines = [line for line in f.readlines() if not token == line.strip() and len(line.strip()) > 0] # remove blackline as well
-            f.seek(0)
-            f.writelines(new_lines)
-            f.truncate()
-    def _cb_append_token_to_file(self, root, i0, i1):
-        if self.ini == ""  or not self._is_valid_single_selection(i0, i1): return # do not write multiple added items appendRows
-        token = self.item(i0).text()
-        with open(self.ini,"a") as f:
-            f.write("\n")
-            f.write(token)
-    def _is_valid_single_selection(self, i0, i1):
-        """ check for valid single selection, assume index 0 is not valid (text input)
-        """
-        return i0 > 0 and i0 == i1
-
-from .connection import SpaceConnectionInfo
-import configparser
-
-class GroupTokenModel(TokenModel):
-    """ Server-group token model, in sync with a ini config file (with sections)
-    """
-    SERVERS = ["PRD"]
-    
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.server = "PRD"
-        
-    def set_server(self, server):
-        self.server = server
-        self._refresh_token()
-
-    def _refresh_token(self):
-        tokens = self.token_groups.options(self.server)
-        self.clear()
-        it = self.invisibleRootItem()
-        # it.appendRow(QStandardItem())
-        it.appendRows([
-            QStandardItem(t) for t in tokens
-            if len(t) > 0
-            ])
 
     def _write_to_file(self):
         if self.ini == "": return
         with open(self.ini, "w") as f:
             self.token_groups.write(f)
 
-    def _load_ini(self, ini):
-        token_groups = configparser.ConfigParser(allow_no_value=True)
-        token_groups.optionxform = str
-        for s in self.SERVERS:
-            if not token_groups.has_section(s):
-                token_groups.add_section(s)
-        with open(ini,"a+") as f:
-            f.seek(0)
-            token_groups.read_file(f)
-        
-        self.token_groups = token_groups
-
-    def _cb_remove_token_from_file(self, root, i0, i1):
-        if not self._is_valid_single_selection(i0, i1): return # do not write multiple added items appendRows
-        token = self.item(i0).text().strip()
-        if self.token_groups.has_option(self.server, token):
-            self.token_groups.remove_option(self.server, token)
-            self._write_to_file()
-        
-    def _cb_append_token_to_file(self, root, i0, i1):
-        if not self._is_valid_single_selection(i0, i1): return # do not write multiple added items appendRows
-        token = self.item(i0).text()
-        if not self.token_groups.has_option(self.server, token):
-            self.token_groups.set(self.server, token)
-            self._write_to_file()
-
-class GroupTokenInfoModel(GroupTokenModel):
-    INFO_KEYS = ["name","token"]
-    SERIALIZE_KEYS = ["token","name"]
-    TOKEN_KEY = "token"
-    DELIM = ","
     
     def set_default_servers(self, default_api_urls):
         self.default_api_urls = default_api_urls
@@ -152,11 +66,12 @@ class GroupTokenInfoModel(GroupTokenModel):
 
     def set_server(self, server):
         # TODO default_api_envs not guaranteed to be init
-        self.server = self.default_api_envs.get(server, server)
+        self.group_key = self.default_api_envs.get(server, server)
         self._refresh_token()
 
     def _refresh_token(self):
-        s = self.server
+        self.cache_tokens = list()
+        s = self.group_key
         if not self.token_groups.has_section(s):
             self.token_groups.add_section(s)
         tokens = self.token_groups.options(s)
@@ -175,6 +90,7 @@ class GroupTokenInfoModel(GroupTokenModel):
                     token_info
                 )
             ])
+
     def _load_ini(self, ini):
         token_groups = configparser.ConfigParser(allow_no_value=True,delimiters=("*",))
         token_groups.optionxform = str
@@ -207,45 +123,34 @@ class GroupTokenInfoModel(GroupTokenModel):
         lst_txt = [token_info.get(k,"") for k in self.SERIALIZE_KEYS]
         return self.DELIM.join(lst_txt)
 
-    def _cb_remove_token_from_file(self, root, i0, i1):
-        if not self._is_valid_single_selection(i0, i1): return # do not write multiple added items appendRows
-        token = self.serialize_token_row(i0)
-        if self.token_groups.has_option(self.server, token):
-            self.token_groups.remove_option(self.server, token)
-            self._write_to_file()
-        
-    def _cb_append_token_to_file(self, root, i0, i1):
-        if not self._is_valid_single_selection(i0, i1): return # do not write multiple added items appendRows
-        token = self.serialize_token_row(i0)
-        if not self.token_groups.has_option(self.server, token):
-            self.token_groups.set(self.server, token)
-            self._write_to_file()
-    def cb_write_token(self):
-        pass
 
-class EditableGroupTokenInfoModel(GroupTokenInfoModel):
-    
+
     def cb_refresh_token(self):
         self._refresh_token()
 
-    def _refresh_token(self):
-        self.cache_tokens = list()
-        super()._refresh_token()
-
     def _config_callback(self):
-        super()._config_callback()
+        try: self.rowsInserted.disconnect()
+        except TypeError: pass
+        try: self.rowsAboutToBeRemoved.disconnect()
+        except TypeError: pass
+
+        self.rowsInserted.connect(self._cb_append_token_to_file)
+
+        # persistent remove (uncomment next line)
+        self.rowsAboutToBeRemoved.connect(self._cb_remove_token_from_file)
+
         try: self.itemChanged.disconnect()
         except TypeError: pass
         # self.rowsMoved.connect(print)
         self.dataChanged.connect(self._cb_changed_token_to_file)
 
     def cb_write_token(self):
-        self.token_groups.remove_section(self.server)
-        self.token_groups.add_section(self.server)
-        tokens = self.token_groups.options(self.server)
+        self.token_groups.remove_section(self.group_key)
+        self.token_groups.add_section(self.group_key)
+        tokens = self.token_groups.options(self.group_key)
         for token in self.cache_tokens:
-            self.token_groups.set(self.server, token)
-        tokens = self.token_groups.options(self.server)
+            self.token_groups.set(self.group_key, token)
+        tokens = self.token_groups.options(self.group_key)
 
         self._write_to_file()
 
@@ -277,7 +182,7 @@ class EditableGroupTokenInfoWithServerModel(EditableGroupTokenInfoModel):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.server="servers"
+        self.group_key = "servers"
         self.set_server = lambda a: None
     
     def set_default_servers(self, default_api_urls):
@@ -288,7 +193,7 @@ class EditableGroupTokenInfoWithServerModel(EditableGroupTokenInfoModel):
         ])
 
     def _init_default_servers(self, server_infos: list):
-        tokens = self.token_groups.options(self.server)
+        tokens = self.token_groups.options(self.group_key)
         # if tokens: return
         existing_server = dict()
         for idx, token in enumerate(tokens):
@@ -314,7 +219,6 @@ class EditableGroupTokenInfoWithServerModel(EditableGroupTokenInfoModel):
                 )
             ])
         self.cb_write_token()
-
 
 class ComboBoxProxyModel(QIdentityProxyModel):
     def __init__(self, token_key="token", named_token="{name}", nonamed_token="<noname token> {token}"):
