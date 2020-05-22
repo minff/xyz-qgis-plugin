@@ -25,7 +25,7 @@ from .gui.space_dialog import MainDialog
 from .gui.space_info_dialog import EditSpaceDialog
 from .gui.util_dialog import ConfirmDialog, exec_warning_dialog
 
-from .xyz_qgis.models import SpaceConnectionInfo, TokenModel, GroupTokenInfoModel, EditableGroupTokenInfoModel, EditableGroupTokenInfoWithServerModel, LOADING_MODES, InvalidLoadingMode
+from .xyz_qgis.models import SpaceConnectionInfo, EditableGroupTokenInfoModel, EditableGroupTokenInfoWithServerModel, LOADING_MODES, InvalidLoadingMode
 from .xyz_qgis.controller import ChainController
 from .xyz_qgis.controller import AsyncFun, parse_qt_args, make_qt_args, make_fun_args, parse_exception_obj, ChainInterrupt
 from .xyz_qgis.loader import (LoaderManager, EmptyXYZSpaceError, ManualInterrupt, InitUploadLayerController, 
@@ -170,8 +170,8 @@ class XYZHubConnector(object):
         self.map_basemap_meta = basemap.load_default_xml()
         self.auth_manager = AuthManager(config.USER_PLUGIN_DIR +"/auth.ini")
         
-        self.token_model = EditableGroupTokenInfoModel(parent)  #GroupTokenInfoModel
-        self.server_model = EditableGroupTokenInfoWithServerModel(parent)  #GroupTokenInfoModel
+        self.token_model = EditableGroupTokenInfoModel(parent)
+        self.server_model = EditableGroupTokenInfoWithServerModel(parent)
 
         self.network = NetManager(parent)
         

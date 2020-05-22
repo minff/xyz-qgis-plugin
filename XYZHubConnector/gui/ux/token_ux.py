@@ -12,7 +12,7 @@
 from qgis.PyQt.QtCore import pyqtSignal
 
 from ...xyz_qgis.models import SpaceConnectionInfo
-from ...xyz_qgis.models.token_model import GroupTokenModel, ComboBoxProxyModel
+from ...xyz_qgis.models.token_model import EditableGroupTokenInfoModel, EditableGroupTokenInfoWithServerModel, ComboBoxProxyModel
 from ...xyz_qgis.controller import make_qt_args
 from ..token_dialog import TokenDialog
 from ..server_dialog import ServerDialog
@@ -54,7 +54,7 @@ class TokenUX(ServerUX):
         self.comboBox_server = None
         self.conn_info = None
         #
-    def config(self, token_model: GroupTokenModel, server_model):
+    def config(self, token_model: EditableGroupTokenInfoModel, server_model: EditableGroupTokenInfoWithServerModel):
         self.conn_info = SpaceConnectionInfo()
 
         self.token_model = token_model

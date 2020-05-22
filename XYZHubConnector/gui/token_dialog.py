@@ -11,7 +11,7 @@
 from qgis.PyQt.QtWidgets import QDialog
 from . import get_ui_class
 
-from ..xyz_qgis.models.token_model import GroupTokenInfoModel
+from ..xyz_qgis.models.token_model import EditableGroupTokenInfoModel
 from .util_dialog import ConfirmDialog
 from .token_info_dialog import NewTokenInfoDialog, EditTokenInfoDialog
 from qgis.PyQt.QtGui import QStandardItem
@@ -32,7 +32,7 @@ class TokenDialog(QDialog, TokenUI):
 
         self.is_used_token_changed = False
         self.current_idx = -1
-    def config(self, token_model: GroupTokenInfoModel):
+    def config(self, token_model: EditableGroupTokenInfoModel):
         
         self.token_model = token_model
 
