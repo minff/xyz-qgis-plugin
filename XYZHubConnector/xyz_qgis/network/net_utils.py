@@ -87,10 +87,11 @@ def make_buffer( obj):
     buffer.open(buffer.ReadOnly)
     return buffer
 def make_query_url( url, **kw):
-    query = "&".join(
+    raw_queries = list(kw.pop("raw_queries", list()))
+    query = "&".join(raw_queries + [
         "%s=%s"%(k,v)
         for k,v in kw.items() if not v is None
-    )
+    ])
     if len(query): 
         url = "%s?%s"%(url, query)
     url = QUrl(url)

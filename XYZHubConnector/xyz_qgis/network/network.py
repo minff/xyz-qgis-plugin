@@ -106,10 +106,30 @@ class NetManager(QObject):
         self._post_send_request(reply,conn_info, kw_prop=kw_prop)
         
         return reply
-        
+
+    def _process_queries(self, kw):
+        selection = ",".join(
+            "p.{value}".format(value=p)
+            for p in kw.pop("selection", "").split(",") if p
+        )
+        if selection: kw["selection"] = selection
+        self._process_raw_queries(kw)
+
+    def _process_raw_queries(self, kw):
+        filters = [
+            "p.{name}{operator}{value}".format(
+                name=p["name"],
+                operator=p["operator"],
+                value=p["values"]
+            )
+            for p in kw.pop("filters", list())
+        ]
+        if filters: kw.setdefault("raw_queries", list()).extend(filters)
+
     def load_features_bbox(self, conn_info, bbox, **kw):
         reply_tag = "bbox"
         endpoint = "/spaces/{space_id}/bbox"
+        self._process_queries(kw)
         kw_request = dict(bbox, **kw)
         kw_prop = dict(reply_tag=reply_tag, bbox=bbox, **kw)
         return self._send_request(conn_info, endpoint, kw_request=kw_request, kw_prop=kw_prop)
@@ -119,18 +139,21 @@ class NetManager(QObject):
         kw_tile = dict(tile_schema=tile_schema, tile_id=tile_id)
         tile_url = "tile/{tile_schema}/{tile_id}".format(**kw_tile)
         endpoint = "/spaces/{space_id}/" + tile_url
+        self._process_queries(kw)
         kw_prop = dict(reply_tag=reply_tag, **dict(kw, **kw_tile))
         return self._send_request(conn_info, endpoint, kw_request=kw, kw_prop=kw_prop)
 
     def load_features_iterate(self, conn_info, **kw):
         reply_tag = kw.pop("reply_tag","iterate")
         endpoint = "/spaces/{space_id}/iterate"
+        self._process_queries(kw)
         kw_prop = dict(reply_tag=reply_tag, **kw)
         return self._send_request(conn_info, endpoint, kw_request=kw, kw_prop=kw_prop)
 
     def load_features_search(self, conn_info, **kw):
         reply_tag = kw.pop("reply_tag","search")
         endpoint = "/spaces/{space_id}/search"
+        self._process_queries(kw)
         kw_prop = dict(reply_tag=reply_tag, **kw)
         return self._send_request(conn_info, endpoint, kw_request=kw, kw_prop=kw_prop)
         

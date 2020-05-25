@@ -9,10 +9,12 @@
 ###############################################################################
 
 from qgis.PyQt.QtCore import QRegExp, pyqtSignal
-from qgis.PyQt.QtGui import QRegExpValidator, QIntValidator  
+from qgis.PyQt.QtGui import QRegExpValidator, QIntValidator
 
 from ...xyz_qgis.controller import make_qt_args
 from ...xyz_qgis.models import LOADING_MODES
+from ...xyz_qgis.models.filter_model import FilterModel
+from ..filter_dialog import FilterDialog
 from .space_ux import SpaceUX, SpaceConnectionInfo
 from .ux import strip_list_string
 
@@ -30,6 +32,9 @@ class ConnectUX(SpaceUX):
         self.radioButton_loading_tile = None
         self.radioButton_loading_single = None
         self.btn_load = None
+        self.btn_filter = None
+        self.checkBox_filter = None
+        self.lineEdit_selection = None
         self.lineEdit_limit = None
         self.lineEdit_max_feat = None
         self.lineEdit_tags = None
@@ -42,6 +47,11 @@ class ConnectUX(SpaceUX):
         self.btn_load.clicked.connect(self.start_connect)
         self.radioButton_loading_single.toggled.connect(self.ui_enable_tile_mode)
 
+        self.filter_dialog = FilterDialog(self)
+        self.filter_dialog.config(FilterModel())
+        self.btn_filter.clicked.connect(self.open_filter_dialog)
+        self.checkBox_filter.setEnabled(False)
+        
         self._set_mask_number(self.lineEdit_limit,0,100000)
         self._set_mask_number(self.lineEdit_max_feat)
         self._set_mask_tags(self.lineEdit_tags)
@@ -85,6 +95,8 @@ class ConnectUX(SpaceUX):
             btn.setToolTip(msg)
         self.lineEdit_max_feat.setToolTip("Maximum limit of features to be loaded")
         self.lineEdit_limit.setToolTip("Number of features loaded per request")
+        self.checkBox_filter.setToolTip("Filter enabled ?")
+        self.btn_filter.setToolTip("Filter feature by property")
             
     def _get_loading_mode(self) -> str:
         for mode, box in zip(LOADING_MODES, [
@@ -95,17 +107,25 @@ class ConnectUX(SpaceUX):
             if box.isChecked(): return mode
         return LOADING_MODES[0]
 
+    def _get_filters(self):
+        filters = self.filter_dialog.get_filters() if self.checkBox_filter.isChecked() else list()
+        for p in filters:
+            p["values"] = strip_list_string(p["values"])
+        return filters
+
     def get_params(self):
-        key = ["tags","limit","max_feat","similarity_threshold","similarity_mode","loading_mode"]
+        key = ["tags","limit","max_feat","similarity_threshold","similarity_mode","loading_mode","selection","filters"]
         val = [
             strip_list_string(self.lineEdit_tags.text().strip()),
             self.lineEdit_limit.text().strip(),
             self.lineEdit_max_feat.text().strip(),
             self.comboBox_similarity_threshold.currentData(),
             self.comboBox_similarity_threshold.currentText(),
-            self._get_loading_mode()
+            self._get_loading_mode(),
+            strip_list_string(self.lineEdit_selection.text().strip()),
+            self._get_filters()
         ]
-        fn = [str, int, int, int, str, str]
+        fn = [str, int, int, int, str, str, str, list]
         return dict( 
             (k, f(v)) for k,v,f in zip(key,val,fn) if len(str(v)) > 0
             )
@@ -139,3 +159,9 @@ class ConnectUX(SpaceUX):
 
         # self.close()
 
+    def open_filter_dialog(self):
+        ret = self.filter_dialog.exec_()
+        flag = bool(self.filter_dialog.get_filters())
+        self.checkBox_filter.setChecked(flag)
+        self.checkBox_filter.setEnabled(flag)
+        return ret
