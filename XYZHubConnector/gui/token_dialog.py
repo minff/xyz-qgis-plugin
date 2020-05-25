@@ -33,14 +33,12 @@ class TokenDialog(QDialog, TokenUI):
         self.is_used_token_changed = False
         self.current_idx = -1
     def config(self, token_model: EditableGroupTokenInfoModel):
-        
-        self.token_model = token_model
+        self._config( token_model)
 
-        self.tableView.setModel( token_model)
         self.tableView.setSelectionMode(self.tableView.SingleSelection)
         self.tableView.setSelectionBehavior(self.tableView.SelectRows)
         self.tableView.setEditTriggers(self.tableView.NoEditTriggers)
-
+        self.tableView.horizontalHeader().setStretchLastSection(True)
 
         # dont use pressed, activated
         self.tableView.selectionModel().currentChanged.connect(self.ui_enable_btn)
@@ -51,6 +49,9 @@ class TokenDialog(QDialog, TokenUI):
         self.btn_up.clicked.connect( self.ui_move_token_up)
         self.btn_down.clicked.connect( self.ui_move_token_down)
 
+    def _config(self, token_model: EditableGroupTokenInfoModel):
+        self.token_model = token_model
+        self.tableView.setModel( token_model)
         self.accepted.connect( token_model.cb_write_token)
         self.rejected.connect( token_model.cb_refresh_token)
         
@@ -93,6 +94,7 @@ class TokenDialog(QDialog, TokenUI):
             dialog.get_info()
         ))
         dialog.exec_()
+        self.tableView.selectRow(self.token_model.rowCount()-1)
 
     def ui_edit_token(self):
         dialog = self.EditInfoDialog(self)
