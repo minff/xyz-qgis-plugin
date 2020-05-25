@@ -22,19 +22,22 @@ class FilterDialog(TokenDialog):
     # refactor tokendialog for resuability
 
     title = "Filter feature by property"
+    message = "Multiple property names represent AND operation. Multiple values represent OR operation."
     token_info_keys = ["name", "operator", "values"]
     NewInfoDialog = NewFilterInfoDialog
     EditInfoDialog = EditFilterInfoDialog
-    
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        for btn in [self.btn_up, self.btn_down]:
+            policy = btn.sizePolicy()
+            policy.setRetainSizeWhenHidden(True)
+            btn.setSizePolicy(policy)
+            btn.setVisible(False)
+        
     def _make_delete_message(self, token_info):
         return "Do you want to Delete ?"
 
     def get_filters(self):
         return self.token_model.get_filters()
-        
-    # def _config(self, token_model: FilterModel):
-    #     self.token_model = token_model
-    #     self.tableView.setModel( token_model)
-    #     self.accepted.connect( token_model.cb_write_token)
-    #     self.rejected.connect( token_model.cb_refresh_token)
         

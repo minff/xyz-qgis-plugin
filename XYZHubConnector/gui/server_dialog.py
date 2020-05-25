@@ -14,6 +14,7 @@ from .token_dialog import TokenDialog
 
 class ServerDialog(TokenDialog):
     title = "Hub Server Manager"
+    message = ""
     token_info_keys = ["name", "server"]
     NewInfoDialog = NewServerInfoDialog
     EditInfoDialog = EditServerInfoDialog

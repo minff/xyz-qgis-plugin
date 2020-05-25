@@ -20,6 +20,7 @@ TokenUI = get_ui_class('token_dialog.ui')
 
 class TokenDialog(QDialog, TokenUI):
     title = "Token Manager"
+    message = ""
     token_info_keys = ["name", "token"]
     NewInfoDialog = NewTokenInfoDialog
     EditInfoDialog = EditTokenInfoDialog
@@ -29,6 +30,9 @@ class TokenDialog(QDialog, TokenUI):
         QDialog.__init__(self, parent)
         TokenUI.setupUi(self, self)
         self.setWindowTitle(self.title)
+        if self.message:
+            self.label_msg.setText(self.message)
+            self.label_msg.setVisible(True)
 
         self.is_used_token_changed = False
         self.current_idx = -1
