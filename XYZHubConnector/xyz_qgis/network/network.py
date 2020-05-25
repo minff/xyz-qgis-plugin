@@ -107,9 +107,19 @@ class NetManager(QObject):
         
         return reply
 
+    def _prefix_query(self, txt, prefix="p.", prefixes=tuple()):
+        """ return prefix to xyz query: 
+            prefixes = ["p.", "f."] # add prefix if none in prefixes exists
+            prefixes = [] # always add prefix, dont check existing
+        """
+        return prefix if not any(map(txt.startswith, prefixes)) else ""
+
     def _process_queries(self, kw):
         selection = ",".join(
-            "p.{value}".format(value=p)
+            "{prefix}{name}".format(
+                name=p,
+                prefix=self._prefix_query(p, "p.")
+            )
             for p in kw.pop("selection", "").split(",") if p
         )
         if selection: kw["selection"] = selection
@@ -117,10 +127,11 @@ class NetManager(QObject):
 
     def _process_raw_queries(self, kw):
         filters = [
-            "p.{name}{operator}{value}".format(
+            "{prefix}{name}{operator}{value}".format(
                 name=p["name"],
                 operator=p["operator"],
-                value=p["values"]
+                value=p["values"],
+                prefix=self._prefix_query(p["name"], "p.")
             )
             for p in kw.pop("filters", list())
         ]
