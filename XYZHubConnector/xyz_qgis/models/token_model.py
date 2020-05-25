@@ -85,6 +85,7 @@ class EditableGroupTokenInfoModel(QStandardItemModel, UsedToken):
             if not line: continue
             token_info = self.deserialize_line(line)
             if not token_info.get(self.TOKEN_KEY): continue
+            if token_info.get(self.TOKEN_KEY) == "[]": continue
             it.appendRow([QStandardItem(t)  
                 for t in self.items_from_token_info(
                     token_info
@@ -101,7 +102,7 @@ class EditableGroupTokenInfoModel(QStandardItemModel, UsedToken):
 
     def get_text(self, row, col):
         it = self.item(row, col)
-        return it.text().strip() if it else None
+        return it.text().strip() if it else "None"
 
     def get_token_info(self, row):
         return dict(
@@ -149,9 +150,9 @@ class EditableGroupTokenInfoModel(QStandardItemModel, UsedToken):
         self.token_groups.add_section(self.group_key)
         tokens = self.token_groups.options(self.group_key)
         for token in self.cache_tokens:
+            if token.startswith("[]"): print(token)
             self.token_groups.set(self.group_key, token)
         tokens = self.token_groups.options(self.group_key)
-
         self._write_to_file()
 
     def _cb_remove_token_from_file(self, root, i0, i1):
@@ -213,6 +214,7 @@ class EditableGroupTokenInfoWithServerModel(EditableGroupTokenInfoModel):
         # add default server
         for i, server_info in enumerate(server_infos):
             if server_info["server"] in existing_server: continue
+            if not server_info.get(self.TOKEN_KEY): continue
             it.insertRow(i,[QStandardItem(t)
                 for t in self.items_from_token_info(
                     server_info
