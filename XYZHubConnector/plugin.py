@@ -151,6 +151,7 @@ class XYZHubConnector(object):
     def new_session(self):
         self.con_man.reset()
         self.edit_buffer.reset()
+        self.pending_delete_qnodes.clear()
         
         if self.hasGuiInitialized:
             self.pb.hide()
@@ -204,8 +205,10 @@ class XYZHubConnector(object):
         self.lastRect = bbox_utils.extent_to_rect(bbox_utils.get_bounding_box(canvas))
         self.iface.mapCanvas().extentsChanged.connect( self.reload_tile, Qt.QueuedConnection)
 
-        # handle delete xyz layer group
-        QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.cb_qnodes_deleted)
+        # handle move, delete xyz layer group
+        self.pending_delete_qnodes = dict()
+        QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.cb_qnodes_deleting)
+        QgsProject.instance().layerTreeRoot().removedChildren.connect(self.cb_qnodes_deleted)
         QgsProject.instance().layerTreeRoot().visibilityChanged.connect(self.cb_qnode_visibility_changed)
         
 
@@ -227,7 +230,8 @@ class XYZHubConnector(object):
 
         self.iface.mapCanvas().extentsChanged.disconnect( self.reload_tile)
         
-        QgsProject.instance().layerTreeRoot().willRemoveChildren.disconnect(self.cb_qnodes_deleted)
+        QgsProject.instance().layerTreeRoot().willRemoveChildren.disconnect(self.cb_qnodes_deleting)
+        QgsProject.instance().layerTreeRoot().removedChildren.disconnect(self.cb_qnodes_deleted)
         QgsProject.instance().layerTreeRoot().visibilityChanged.disconnect(self.cb_qnode_visibility_changed)
 
         QgsProject.instance().readProject.disconnect( self.import_project)
@@ -741,17 +745,23 @@ class XYZHubConnector(object):
         if con:
             con.stop_loading()
 
-    def cb_qnodes_deleted(self, parent, i0, i1):
+    def cb_qnodes_deleting(self, parent, i0, i1):
+        key = (parent,i0,i1)
         is_parent_root = not parent.parent()
         lst = parent.children()
         for i in range(i0, i1+1):
             qnode = lst[i]
             if (is_parent_root and is_xyz_supported_node(qnode)):
                 xlayer_id = get_customProperty_str(qnode, QProps.UNIQUE_ID)
+                self.pending_delete_qnodes.setdefault(key, list()).append(xlayer_id)
                 self.con_man.remove_persistent_loader(xlayer_id)
             # is possible to handle vlayer delete here
             # instead of handle in layer.py via callbacks
- 
+
+    def cb_qnodes_deleted(self, parent, i0, i1):
+        key = (parent,i0,i1)
+        for xlayer_id in self.pending_delete_qnodes.pop(key, list()):
+            self.con_man.remove_persistent_loader(xlayer_id)
 
     ############### 
     # Open dialog
