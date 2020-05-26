@@ -9,6 +9,14 @@
 ###############################################################################
 
 
+def parse_copyright(v):
+    if not isinstance(v, list): return v
+    lst = [
+        ". ".join(el[j] for j in ["label","alt"] if j in el)
+        for el in v
+    ]
+    return lst
+
 class SpaceConnectionInfo(object):
     def __init__(self, conn_info=None):
         if conn_info is None:
