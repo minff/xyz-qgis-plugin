@@ -653,9 +653,9 @@ class XYZHubConnector(object):
 
     def add_basemap_layer(self, args):
         a, kw = parse_qt_args(args)
-        meta, app_id, app_code = a
-        self.auth_manager.save(app_id, app_code)
-        basemap.add_basemap_layer( meta, app_id, app_code)
+        meta, app_id, app_code, api_key = a
+        self.auth_manager.save(app_id, app_code, api_key)
+        basemap.add_basemap_layer( meta, app_id, app_code, api_key)
 
     ############### 
     # import project function
