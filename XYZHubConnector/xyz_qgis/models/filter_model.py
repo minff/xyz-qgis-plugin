@@ -29,9 +29,6 @@ class FilterModel(EditableGroupTokenInfoModel):
     def get_filters(self):
         return self.filters
 
-    # def _config_callback(self):
-    #     # do nothing
-    #     pass
     def load_ini(self, ini):
         raise NotImplementedError()
     def _load_ini(self, ini):

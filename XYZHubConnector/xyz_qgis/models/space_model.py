@@ -10,6 +10,7 @@
 
 
 from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QVariant
+
 def parse_copyright(v):
     if not isinstance(v, list): return v
     lst = [

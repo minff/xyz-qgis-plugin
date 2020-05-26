@@ -9,11 +9,10 @@
 ###############################################################################
 
 
+import configparser
+
 from qgis.PyQt.QtGui import QStandardItemModel, QStandardItem
 from qgis.PyQt.QtCore import QIdentityProxyModel, Qt, QVariant
-
-from .connection import SpaceConnectionInfo
-import configparser
 
 class UsedToken():
     def __init__(self):
