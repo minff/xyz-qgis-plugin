@@ -47,11 +47,19 @@ class FilterInfoDialog(QDialog, FilterEditUI):
     def get_info(self):
         d = {
             "name": self.lineEdit_name.text(),
-            "operator": self.get_alias_operator(),
+            "operator": self.comboBox_operator.currentText().strip(),
             "values": strip_list_string(self.lineEdit_values.text().strip())
         }
         return d
 
+    def get_alias_info(self):
+        d = {
+            "name": self.lineEdit_name.text(),
+            "operator": self.get_alias_operator(),
+            "values": strip_list_string(self.lineEdit_values.text().strip())
+        }
+        return d
+        
     def set_info(self, info):
         self.lineEdit_name.setText(info.get("name",""))
         self.lineEdit_values.setText(info.get("values",""))
