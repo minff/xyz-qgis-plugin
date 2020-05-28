@@ -11,6 +11,7 @@
 from collections import deque
 from . import bbox_utils
 from typing import Iterable
+from ..common.utils import get_current_millis_time
 
 class InvalidParamsError(Exception): 
     pass
@@ -33,6 +34,8 @@ class ParamsQueue(object):
         return False
 
 class SimpleQueue(ParamsQueue):
+    """ Simple params queue with setter, getter
+    """
     def __init__(self, params: list=None, key=None, **kw):
         self._queue = list()
         self.idx = 0
@@ -50,6 +53,9 @@ class SimpleQueue(ParamsQueue):
 
         
 class CachedQueue(ParamsQueue):
+    """ Params queue that cache params based on key, 
+    ie. params with cached value for the given key will not be returned
+    """
     def __init__(self, key=None, **kw):
         self._key = key
         self._queue = list()
@@ -67,6 +73,38 @@ class CachedQueue(ParamsQueue):
         idx = self.idx
         self.idx += 1 
         return self._queue[idx]
+
+class TimeCachedQueue(ParamsQueue):
+    """ Params queue that cache params based on key and last requested time, 
+    ie. last requested time will be added to the cached params via fn_preprocess function
+    """
+    def __init__(self, key=None, fn_preprocess=None, **kw):
+        self._key = key
+        self._fn_preprocess = fn_preprocess
+        self._queue = list()
+        self._cache = dict()
+        self.idx = 0
+    def set_params(self, lst: list):
+        # self._queue = [
+        #     dict(p, updatedAt=self._cache[p[self._key]]) if p[self._key] in self._cache else p
+        #     for p in lst if self._key in p]
+        self._queue = list(lst)
+        self.idx = 0
+    def has_next(self):
+        return self.idx < len(self._queue)
+    def get_params(self):
+        idx = self.idx
+        self.idx += 1
+        params = self._queue[idx]
+        if self._key in params and params[self._key] in self._cache:
+            self._fn_preprocess(params, self._cache[params[self._key]])
+        self._cache[params[self._key]] = get_current_millis_time()
+        return params
+    def reset_cached_params(self, values):
+        for v in values:
+            self._cache.pop(v, None)
+    def reset_all_cached_params(self):
+        self._cache.clear()
 
 class DequeParamsQueue(ParamsQueue):
     def __init__(self, params: list, **kw):
