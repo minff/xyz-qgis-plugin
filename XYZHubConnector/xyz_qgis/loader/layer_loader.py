@@ -286,10 +286,7 @@ class TileLayerLoader(LoadLayerController):
     def __init__(self, network: NetManager, *a, layer: XYZLayer=None, **kw):
         super().__init__(network, *a, **kw)
         self.fixed_keys = ["tags", "limit", "tile_schema", "filters", "selection"]
-        self.params_queue = queue.TimeCachedQueue(key="tile_id", 
-            fn_preprocess=lambda params, updatedAt: params.setdefault("raw_queries", list())
-            .append("f.updatedAt>={}".format(updatedAt))
-            )
+        self.params_queue = queue.SimpleQueue(key="tile_id") # dont have retry logic
         self.layer = layer
         self.total_params = 0
         self.cnt_params = 0
