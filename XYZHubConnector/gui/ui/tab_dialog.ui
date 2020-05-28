@@ -35,8 +35,8 @@
       <property name="bottomMargin">
        <number>3</number>
       </property>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="btn_token">
+      <item row="0" column="5">
+       <widget class="QPushButton" name="btn_use">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -44,14 +44,39 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Manage Token</string>
+         <string>Connect</string>
         </property>
         <property name="autoDefault">
          <bool>false</bool>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
+      <item row="0" column="3">
+       <widget class="QComboBox" name="comboBox_server_url">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="editable">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Data Hub Server</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
        <widget class="QComboBox" name="comboBox_token">
         <property name="enabled">
          <bool>true</bool>
@@ -65,25 +90,31 @@
         <property name="editable">
          <bool>false</bool>
         </property>
+        <property name="toolTip">
+         <string>Data Hub Token</string>
+        </property>
        </widget>
       </item>
-      <item row="0" column="3">
-       <widget class="QPushButton" name="btn_server">
+      <item row="0" column="1">
+       <widget class="QToolButton" name="btn_menu">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Manage Server</string>
+         <string>...</string>
         </property>
-        <property name="autoDefault">
-         <bool>false</bool>
+        <property name="popupMode">
+         <enum>QToolButton::InstantPopup</enum>
+        </property>
+        <property name="toolTip">
+         <string>Manage Hub Server/Token</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="0" column="0">
        <widget class="QComboBox" name="comboBox_server">
         <property name="enabled">
          <bool>true</bool>
@@ -100,6 +131,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <item>
          <property name="text">
           <string>PRD</string>
@@ -115,38 +149,6 @@
           <string>SIT</string>
          </property>
         </item>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QComboBox" name="comboBox_server_url">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="editable">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QPushButton" name="btn_use">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Connect</string>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
        </widget>
       </item>
      </layout>
@@ -220,6 +222,21 @@
        <string>Load</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QWidget" name="widget_2" native="true">
          <property name="sizePolicy">
@@ -305,7 +322,7 @@
           <item row="0" column="1" colspan="3">
            <widget class="QLineEdit" name="lineEdit_tags">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -334,7 +351,7 @@
           <item row="1" column="1" colspan="3">
            <widget class="QLineEdit" name="lineEdit_selection">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -390,7 +407,7 @@
            </widget>
           </item>
           <item row="2" column="1" colspan="3">
-            <widget class="QWidget" name="widget_line_filter" native="true">
+           <widget class="QWidget" name="widget_line_filter" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_9">
              <property name="spacing">
               <number>0</number>
@@ -407,40 +424,40 @@
              <property name="bottomMargin">
               <number>0</number>
              </property>
-              <item>
-               <widget class="QLineEdit" name="lineEdit_filter">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maxLength">
-                 <number>2000</number>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-                <property name="placeholderText">
-                 <string>No property query</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QToolButton" name="btn_filter">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>...</string>
-                </property>
-               </widget>
-              </item>
+             <item>
+              <widget class="QLineEdit" name="lineEdit_filter">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maxLength">
+                <number>2000</number>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="placeholderText">
+                <string>No property query</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="btn_filter">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+              </widget>
+             </item>
             </layout>
-            </widget>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -449,17 +466,11 @@
         <widget class="QWidget" name="widget_4" native="true">
          <property name="maximumSize">
           <size>
-           <width>220</width>
+           <width>240</width>
            <height>16777215</height>
           </size>
          </property>
          <layout class="QFormLayout" name="formLayout">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
           <item row="0" column="0" colspan="2">
            <widget class="QPushButton" name="btn_load">
             <property name="text">
@@ -538,6 +549,21 @@
        <string>Upload</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QWidget" name="widget_3" native="true">
          <property name="sizePolicy">
@@ -599,17 +625,11 @@
         <widget class="QWidget" name="widget_5" native="true">
          <property name="maximumSize">
           <size>
-           <width>220</width>
+           <width>240</width>
            <height>16777215</height>
           </size>
          </property>
          <layout class="QFormLayout" name="formLayout_4">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
           <item row="0" column="0" colspan="2">
            <widget class="QPushButton" name="btn_upload">
             <property name="text">
@@ -631,54 +651,75 @@
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <property name="spacing">
-        <number>20</number>
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
        </property>
        <item>
-        <widget class="QPushButton" name="btn_new">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>New</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_edit">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Edit</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_delete">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Delete</string>
-         </property>
+        <widget class="QWidget" name="widget_10" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <property name="spacing">
+           <number>20</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="btn_new">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>New</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_edit">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Edit</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_delete">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Delete</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -691,6 +732,21 @@
        <string>Map Tile</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QWidget" name="widget_6" native="true">
          <property name="sizePolicy">
@@ -800,17 +856,11 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>220</width>
+           <width>240</width>
            <height>16777215</height>
           </size>
          </property>
          <layout class="QFormLayout" name="formLayout_6">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
           <item row="0" column="0" colspan="2">
            <widget class="QPushButton" name="btn_basemap">
             <property name="text">
@@ -831,37 +881,52 @@
        <string>Settings</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
+        <widget class="QWidget" name="widget_8" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <widget class="QWidget" name="widget_9" native="true">
          <property name="maximumSize">
           <size>
-           <width>220</width>
+           <width>240</width>
            <height>16777215</height>
           </size>
          </property>
          <layout class="QFormLayout" name="formLayout_8">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
           <item row="0" column="0" colspan="2">
            <widget class="QPushButton" name="btn_clear_cache">
             <property name="text">
@@ -886,6 +951,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>btn_menu</tabstop>
   <tabstop>comboBox_server_url</tabstop>
   <tabstop>comboBox_token</tabstop>
   <tabstop>btn_use</tabstop>
