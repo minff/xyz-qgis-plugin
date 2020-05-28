@@ -40,4 +40,8 @@ class FilterDialog(TokenDialog):
 
     def get_filters(self):
         return self.token_model.get_filters()
+
+    def get_display_str(self):
+        return self.token_model.get_display_str()
+        
         

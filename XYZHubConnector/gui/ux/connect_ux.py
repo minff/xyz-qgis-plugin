@@ -33,7 +33,7 @@ class ConnectUX(SpaceUX):
         self.radioButton_loading_single = None
         self.btn_load = None
         self.btn_filter = None
-        self.checkBox_filter = None
+        self.lineEdit_filter = None
         self.lineEdit_selection = None
         self.lineEdit_limit = None
         self.lineEdit_max_feat = None
@@ -50,7 +50,6 @@ class ConnectUX(SpaceUX):
         self.filter_dialog = FilterDialog(self)
         self.filter_dialog.config(FilterModel())
         self.btn_filter.clicked.connect(self.open_filter_dialog)
-        self.checkBox_filter.setEnabled(False)
         
         self._set_mask_number(self.lineEdit_limit,0,100000)
         self._set_mask_number(self.lineEdit_max_feat)
@@ -95,7 +94,6 @@ class ConnectUX(SpaceUX):
             btn.setToolTip(msg)
         self.lineEdit_max_feat.setToolTip("Maximum limit of features to be loaded")
         self.lineEdit_limit.setToolTip("Number of features loaded per request")
-        self.checkBox_filter.setToolTip("Filter enabled ?")
         self.btn_filter.setToolTip("Filter feature by property")
             
     def _get_loading_mode(self) -> str:
@@ -108,10 +106,10 @@ class ConnectUX(SpaceUX):
         return LOADING_MODES[0]
 
     def _get_filters(self):
-        filters = self.filter_dialog.get_filters() if self.checkBox_filter.isChecked() else list()
+        filters = self.filter_dialog.get_filters()
         for p in filters:
             p["values"] = strip_list_string(p["values"])
-        return filters
+        return filters or None
 
     def get_params(self):
         key = ["tags","limit","max_feat","similarity_threshold","similarity_mode","loading_mode","selection","filters"]
@@ -127,7 +125,7 @@ class ConnectUX(SpaceUX):
         ]
         fn = [str, int, int, int, str, str, str, list]
         return dict( 
-            (k, f(v)) for k,v,f in zip(key,val,fn) if len(str(v)) > 0
+            (k, f(v)) for k,v,f in zip(key,val,fn) if v is not None and len(str(v)) > 0
             )
     def _set_mask_number(self, lineEdit, lo:int=0, hi:int=None):
         validator = QIntValidator()
@@ -161,7 +159,6 @@ class ConnectUX(SpaceUX):
 
     def open_filter_dialog(self):
         ret = self.filter_dialog.exec_()
-        flag = bool(self.filter_dialog.get_filters())
-        self.checkBox_filter.setChecked(flag)
-        self.checkBox_filter.setEnabled(flag)
+        if ret == self.filter_dialog.Accepted:
+            self.lineEdit_filter.setText(self.filter_dialog.get_display_str())
         return ret

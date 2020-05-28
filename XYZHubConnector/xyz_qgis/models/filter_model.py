@@ -69,3 +69,10 @@ class FilterModel(EditableGroupTokenInfoModel):
         token = self.get_token_info(i0)
         self.cache_tokens[i0] = token
 
+    # functions for lineedit
+
+    def get_display_str(self):
+        return "&".join(
+            "".join(d[k] for k in ["name","operator","values"]) 
+            for d in self.get_filters()
+        )
