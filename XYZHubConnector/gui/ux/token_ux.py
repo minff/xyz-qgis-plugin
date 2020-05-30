@@ -49,7 +49,8 @@ class TokenUX(ServerUX):
         # these are like abstract variables
         self.comboBox_token = None
         self.btn_use = None
-        self.btn_menu = None
+        self.action_manage_server = None
+        self.action_manage_token = None
         self.comboBox_server_url = None
         self.comboBox_server = None
         self.conn_info = None
@@ -96,10 +97,8 @@ class TokenUX(ServerUX):
         # self.comboBox_token.editTextChanged.connect(self.ui_valid_input)
 
         self.btn_use.clicked.connect(self.cb_token_used)
-        menu = QMenu(self)
-        menu.addAction("Manage Hub Server").triggered.connect(self.open_server_dialog)
-        menu.addAction("Manage Hub Token").triggered.connect(self.open_token_dialog)
-        self.btn_menu.setMenu(menu)
+        self.action_manage_server.triggered.connect(self.open_server_dialog)
+        self.action_manage_token.triggered.connect(self.open_token_dialog)
 
         self.comboBox_token.setCurrentIndex(0)
         self.ui_valid_input() # valid_input initially (explicit)
