@@ -13,7 +13,7 @@ from qgis.testing import unittest, start_app
 
 from XYZHubConnector.xyz_qgis.controller import AsyncFun, WorkerFun
 from XYZHubConnector.xyz_qgis.common.error import pretty_print_error
-from XYZHubConnector.xyz_qgis.network import NetManager, net_handler
+from XYZHubConnector.xyz_qgis.network import NetManager, net_utils
 from XYZHubConnector.xyz_qgis.models import SpaceConnectionInfo
 
 import time
@@ -290,6 +290,7 @@ def get_token_space(key):
 def get_conn_info(key):
     conn_info = SpaceConnectionInfo()
     token, space_id, server = get_token_space(key)
+    server = net_utils.API_URL.get(server,server)
     if token is not None:
         conn_info.set_(token=token,space_id=space_id,server=server)
     return conn_info
