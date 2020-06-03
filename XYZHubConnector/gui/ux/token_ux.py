@@ -80,14 +80,14 @@ class TokenUX(ServerUX):
         # self.comboBox_server.currentIndexChanged[str].connect(self.set_server)
         # self.comboBox_server.currentIndexChanged[str].connect(self.ui_valid_input)
 
-        self.comboBox_server_url.currentIndexChanged[int].connect(self.cb_comboxBox_server_selected)
+        self.comboBox_server_url.currentIndexChanged[int].connect(self.cb_comboBox_server_selected)
         self.comboBox_server_url.currentIndexChanged[int].connect(self.ui_valid_input)
 
         token_model.set_server(self.comboBox_server.currentText())
         self.conn_info.set_server(self.comboBox_server.currentText())
 
         self.token_dialog = TokenDialog(self)
-        self.token_dialog.config(token_model)
+        self.token_dialog.config(token_model, server_model)
 
         self.server_dialog = ServerDialog(self)
         self.server_dialog.config(server_model)
@@ -105,17 +105,21 @@ class TokenUX(ServerUX):
 
     def open_token_dialog(self):
         idx = self.comboBox_token.currentIndex()
+        server_idx = self.comboBox_server_url.currentIndex()
         self.token_dialog.set_current_idx(idx)
+        self.token_dialog.set_current_server_idx(server_idx)
         self.token_dialog.exec_()
-        idx = self.token_dialog.current_idx
+        idx = self.token_dialog.get_current_idx()
         self.comboBox_token.setCurrentIndex(idx)
+        server_idx = self.token_dialog.get_current_server_idx()
+        self.comboBox_server_url.setCurrentIndex(server_idx)
         return self.token_dialog.is_used_token_changed
         
     def open_server_dialog(self):
         idx = self.comboBox_server_url.currentIndex()
         self.server_dialog.set_current_idx(idx)
         self.server_dialog.exec_()
-        idx = self.server_dialog.current_idx
+        idx = self.server_dialog.get_current_idx()
         self.comboBox_server_url.setCurrentIndex(idx)
         return self.server_dialog.is_used_token_changed
 
@@ -131,7 +135,7 @@ class TokenUX(ServerUX):
         proxy_server_model = self.comboBox_server_url.model()
         return proxy_server_model.get_token(self.comboBox_server_url.currentIndex())
 
-    def cb_comboxBox_server_selected(self, index):
+    def cb_comboBox_server_selected(self, index):
         server = self.comboBox_server_url.model().get_token(index)
         self.set_server(server)
 

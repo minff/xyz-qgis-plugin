@@ -11,7 +11,7 @@
 from qgis.PyQt.QtWidgets import QDialog
 from . import get_ui_class
 
-from ..xyz_qgis.models.token_model import EditableGroupTokenInfoModel
+from ..xyz_qgis.models.token_model import EditableGroupTokenInfoModel, EditableGroupTokenInfoWithServerModel, ComboBoxProxyModel
 from .util_dialog import ConfirmDialog
 from .token_info_dialog import NewTokenInfoDialog, EditTokenInfoDialog
 from qgis.PyQt.QtGui import QStandardItem
@@ -27,17 +27,42 @@ class TokenDialog(QDialog, TokenUI):
     
     def __init__(self, parent=None):
         """init window"""
+        self.comboBox_server_url = None
         QDialog.__init__(self, parent)
         TokenUI.setupUi(self, self)
         self.setWindowTitle(self.title)
         if self.message:
             self.label_msg.setText(self.message)
             self.label_msg.setVisible(True)
+        is_server_dialog = "server" in self.token_info_keys
+        self.comboBox_server_url.setVisible(not is_server_dialog)
+        if is_server_dialog:
+            pass
 
         self.is_used_token_changed = False
         self.current_idx = -1
-    def config(self, token_model: EditableGroupTokenInfoModel):
+        self.current_server_idx = -1
+
+    def set_server(self, server):
+        self.token_model.set_server(server)
+        self.token_model.reset_used_token_idx()
+
+    def cb_comboBox_server_selected(self, index):
+        server = self.comboBox_server_url.model().get_token(index)
+        self.set_server(server)
+
+    def config(self, token_model: EditableGroupTokenInfoModel, server_model: EditableGroupTokenInfoWithServerModel=None):
         self._config( token_model)
+        
+        if server_model:
+            # TODO: refactor into combobox server ux
+            proxy_server_model = ComboBoxProxyModel(token_key="server", nonamed_token="")
+            proxy_server_model.setSourceModel( server_model)
+            proxy_server_model.set_keys(server_model.INFO_KEYS)
+            self.comboBox_server_url.setModel(proxy_server_model)
+            self.comboBox_server_url.setInsertPolicy(self.comboBox_server_url.NoInsert)
+            self.comboBox_server_url.setDuplicatesEnabled(False)
+            self.comboBox_server_url.currentIndexChanged[int].connect(self.cb_comboBox_server_selected)
 
         self.tableView.setSelectionMode(self.tableView.SingleSelection)
         self.tableView.setSelectionBehavior(self.tableView.SelectRows)
@@ -63,6 +88,8 @@ class TokenDialog(QDialog, TokenUI):
         # self.tableView.resizeColumnsToContents()
         # self.tableView.clearFocus()
         self.tableView.selectRow(self.current_idx)
+        if self.comboBox_server_url:
+            self.comboBox_server_url.setCurrentIndex(self.current_server_idx)
         self.ui_enable_btn()
         self.is_used_token_changed = False
         ret = super().exec_()
@@ -70,9 +97,17 @@ class TokenDialog(QDialog, TokenUI):
             self.is_used_token_changed = True
             idx = self.tableView.currentIndex().row()
             if idx >= 0: self.set_current_idx(idx)
+            if self.comboBox_server_url:
+                self.current_server_idx = self.comboBox_server_url.currentIndex()
         return ret
     def set_current_idx(self,idx):
         self.current_idx = idx
+    def get_current_idx(self):
+        return self.current_idx
+    def set_current_server_idx(self, idx):
+        self.current_server_idx = idx
+    def get_current_server_idx(self):
+        return self.current_server_idx
     def ui_enable_btn(self, *a):
         index = self.tableView.currentIndex()
         flag = index.isValid()
