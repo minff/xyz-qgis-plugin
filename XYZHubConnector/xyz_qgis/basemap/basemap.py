@@ -28,10 +28,10 @@ def load_xml(file):
     return map_meta
 def add_auth(meta, app_id, app_code, api_key):
     sep = "&" if "?" in meta["url"] else "?"
-    if app_id:
-        url = "{url}{sep}app_id={app_id}&app_code={app_code}".format(url=meta["url"], sep=sep, app_id=app_id, app_code=app_code)
-    elif api_key:
+    if api_key:
         url = "{url}{sep}apiKey={api_key}".format(url=meta["url"], sep=sep, api_key=api_key)
+    elif app_id:
+        url = "{url}{sep}app_id={app_id}&app_code={app_code}".format(url=meta["url"], sep=sep, app_id=app_id, app_code=app_code)
     meta["url"] = url
 
 # qgswmscapabilities.cpp
