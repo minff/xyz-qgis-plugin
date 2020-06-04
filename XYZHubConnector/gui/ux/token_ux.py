@@ -106,19 +106,19 @@ class TokenUX(ServerUX):
 
     def open_token_dialog(self):
         idx = self.comboBox_token.currentIndex()
+        self.token_dialog.set_active_idx(idx)
         server_idx = self.comboBox_server_url.currentIndex()
-        self.token_dialog.set_current_idx(idx)
-        self.token_dialog.set_current_server_idx(server_idx)
+        self.token_dialog.set_active_server_idx(server_idx)
         self.token_dialog.exec_()
-        idx = self.token_dialog.get_current_idx()
+        idx = self.token_dialog.get_active_idx()
         self.comboBox_token.setCurrentIndex(idx)
         return self.token_dialog.is_used_token_changed
         
     def open_server_dialog(self):
         idx = self.comboBox_server_url.currentIndex()
-        self.server_dialog.set_current_idx(idx)
+        self.server_dialog.set_active_idx(idx)
         self.server_dialog.exec_()
-        idx = self.server_dialog.get_current_idx()
+        idx = self.server_dialog.get_active_idx()
         self.comboBox_server_url.setCurrentIndex(idx)
         return self.server_dialog.is_used_token_changed
 

@@ -40,8 +40,8 @@ class TokenDialog(QDialog, TokenUI):
             pass
 
         self.is_used_token_changed = False
-        self.current_idx = -1
-        self.current_server_idx = -1
+        self._active_idx = -1
+        self._active_server_idx = -1
 
     def set_server(self, server):
         self.token_model.set_server(server)
@@ -89,25 +89,25 @@ class TokenDialog(QDialog, TokenUI):
     def exec_(self):
         # self.tableView.resizeColumnsToContents()
         # self.tableView.clearFocus()
-        self.tableView.selectRow(self.current_idx)
+        self.tableView.selectRow(self.get_active_idx())
         if self.comboBox_server_url:
-            self.comboBox_server_url.setCurrentIndex(self.current_server_idx)
+            self.comboBox_server_url.setCurrentIndex(self.get_active_server_idx())
         self.ui_enable_btn()
         self.is_used_token_changed = False
         ret = super().exec_()
         if ret == self.Accepted:
             self.is_used_token_changed = True
             idx = self.tableView.currentIndex().row()
-            if idx >= 0: self.set_current_idx(idx)
+            if idx >= 0: self.set_active_idx(idx)
         return ret
-    def set_current_idx(self,idx):
-        self.current_idx = idx
-    def get_current_idx(self):
-        return self.current_idx
-    def set_current_server_idx(self, idx):
-        self.current_server_idx = idx
-    def get_current_server_idx(self):
-        return self.current_server_idx
+    def set_active_idx(self,idx):
+        self._active_idx = idx
+    def get_active_idx(self):
+        return self._active_idx
+    def set_active_server_idx(self, idx):
+        self._active_server_idx = idx
+    def get_active_server_idx(self):
+        return self._active_server_idx
     def ui_enable_btn(self, *a):
         index = self.tableView.currentIndex()
         flag = index.isValid()
