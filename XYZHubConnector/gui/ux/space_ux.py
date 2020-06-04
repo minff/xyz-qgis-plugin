@@ -36,7 +36,7 @@ class SpaceUX(TokenUX):
         self.tableView_space.setSortingEnabled(True)
 
         ############# connect gui
-        self.tableView_space.pressed.connect(self.cb_table_row_selected)
+        self.tableView_space.selectionModel().currentChanged.connect(self.cb_table_row_selected)
         
         self.btn_use.clicked.connect(self._get_space_model().reset)
         TokenUX.config(self,token_model,server_model)
@@ -66,7 +66,7 @@ class SpaceUX(TokenUX):
         self.ui_valid_input()
 
     ##### CALLBACK
-    def cb_table_row_selected(self, index):
+    def cb_table_row_selected(self, *a):
         # pending token -> gui
         self.comboBox_token.setCurrentIndex(self.token_model.get_used_token_idx())
         self.ui_valid_input()
