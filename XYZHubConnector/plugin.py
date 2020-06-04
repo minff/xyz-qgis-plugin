@@ -401,7 +401,7 @@ class XYZHubConnector(object):
         dialog = MainDialog(parent)
 
         dialog.config(self.token_model, self.server_model)
-        dialog.config_secret(self.secret)
+        # dialog.config_secret(self.secret)
         auth = self.auth_manager.get_auth()
         dialog.config_basemap(self.map_basemap_meta, auth)
 

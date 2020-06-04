@@ -21,7 +21,7 @@ from ..server_dialog import ServerDialog
 from ..token_dialog import TokenDialog
 from .ux import UXDecorator
 
-class ServerUX(UXDecorator):
+class SecretServerUX(UXDecorator):
     def __init__(self):
         # these are like abstract variables
         self.comboBox_server = None
@@ -43,7 +43,7 @@ class ServerUX(UXDecorator):
     def mouseDoubleClickEvent(self, event):
         self._check_secret()
 
-class TokenUX(ServerUX):
+class TokenUX(UXDecorator):
     signal_use_token = pyqtSignal(object)
     def __init__(self):
         # these are like abstract variables
