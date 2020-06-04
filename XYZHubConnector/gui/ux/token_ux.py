@@ -87,7 +87,8 @@ class TokenUX(ServerUX):
         self.conn_info.set_server(self.comboBox_server.currentText())
 
         self.token_dialog = TokenDialog(self)
-        self.token_dialog.config(token_model, server_model)
+        self.token_dialog.config(token_model)
+        self.token_dialog.config_server_ux(server_model, self.comboBox_server_url)
 
         self.server_dialog = ServerDialog(self)
         self.server_dialog.config(server_model)
@@ -111,8 +112,6 @@ class TokenUX(ServerUX):
         self.token_dialog.exec_()
         idx = self.token_dialog.get_current_idx()
         self.comboBox_token.setCurrentIndex(idx)
-        server_idx = self.token_dialog.get_current_server_idx()
-        self.comboBox_server_url.setCurrentIndex(server_idx)
         return self.token_dialog.is_used_token_changed
         
     def open_server_dialog(self):
