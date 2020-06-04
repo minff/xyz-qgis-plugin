@@ -10,7 +10,6 @@
 
 
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis.PyQt.QtWidgets import QMenu
 
 from ...xyz_qgis.controller import make_qt_args
 from ...xyz_qgis.models import SpaceConnectionInfo
@@ -49,8 +48,8 @@ class TokenUX(UXDecorator):
         # these are like abstract variables
         self.comboBox_token = None
         self.btn_use = None
-        self.action_manage_server = None
-        self.action_manage_token = None
+        self.btn_token = None
+        # self.btn_server = None
         self.comboBox_server_url = None
         self.comboBox_server = None
         self.conn_info = None
@@ -99,8 +98,8 @@ class TokenUX(UXDecorator):
         # self.comboBox_token.editTextChanged.connect(self.ui_valid_input)
 
         self.btn_use.clicked.connect(self.cb_token_used)
-        self.action_manage_server.triggered.connect(self.open_server_dialog)
-        self.action_manage_token.triggered.connect(self.open_token_dialog)
+        self.btn_token.clicked.connect(self.open_token_dialog)
+        # self.btn_server.clicked.connect(self.open_server_dialog)
 
         self.comboBox_token.setCurrentIndex(0)
         self.ui_valid_input() # valid_input initially (explicit)

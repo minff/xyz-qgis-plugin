@@ -75,37 +75,6 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QToolButton" name="btn_menu_conn">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Setup Hub Server/Token</string>
-           </property>
-           <property name="text">
-            <string>Setup..</string>
-           </property>
-           <property name="popupMode">
-            <enum>QToolButton::InstantPopup</enum>
-           </property>
-           <action name="action_manage_server">
-            <property name="text">
-             <string>Hub Server</string>
-            </property>
-           </action>
-           <action name="action_manage_token">
-            <property name="text">
-             <string>Hub Token</string>
-            </property>
-           </action>
-           <addaction name="action_manage_server"/>
-           <addaction name="action_manage_token"/>
-          </widget>
-         </item>
         </layout>
        </widget>
       </item>
@@ -121,6 +90,22 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
+         <item row="1" column="4">
+          <widget class="QPushButton" name="btn_token">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Setup</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="3">
           <widget class="QPushButton" name="btn_use">
            <property name="sizePolicy">
@@ -1058,7 +1043,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>btn_menu_conn</tabstop>
+  <tabstop>btn_token</tabstop>
   <tabstop>comboBox_server_url</tabstop>
   <tabstop>comboBox_token</tabstop>
   <tabstop>btn_use</tabstop>
