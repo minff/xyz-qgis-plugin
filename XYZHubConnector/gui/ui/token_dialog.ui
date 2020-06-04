@@ -55,12 +55,18 @@
      <property name="text">
       <string>Edit</string>
      </property>
+     <property name="autoDefault">
+      <bool>false</bool>
+     </property>
     </widget>
    </item>
    <item row="4" column="1">
     <widget class="QPushButton" name="btn_delete">
      <property name="text">
       <string>Delete</string>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -69,12 +75,18 @@
      <property name="text">
       <string>Move up</string>
      </property>
+     <property name="autoDefault">
+      <bool>false</bool>
+     </property>
     </widget>
    </item>
    <item row="6" column="1">
     <widget class="QPushButton" name="btn_down">
      <property name="text">
       <string>Move down</string>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
