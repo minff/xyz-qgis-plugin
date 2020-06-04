@@ -28,16 +28,16 @@ class TokenDialog(QDialog, TokenUI):
     def __init__(self, parent=None):
         """init window"""
         self.comboBox_server_url = None
+        self.btn_server = None
         QDialog.__init__(self, parent)
         TokenUI.setupUi(self, self)
         self.setWindowTitle(self.title)
         if self.message:
             self.label_msg.setText(self.message)
             self.label_msg.setVisible(True)
-        is_server_dialog = "server" in self.token_info_keys
-        self.comboBox_server_url.setVisible(not is_server_dialog)
-        if is_server_dialog:
-            pass
+        is_token_dialog = "token" in self.token_info_keys
+        self.comboBox_server_url.setVisible(is_token_dialog)
+        self.btn_server.setVisible(is_token_dialog)
 
         self.is_used_token_changed = False
         self._active_idx = -1
@@ -51,7 +51,7 @@ class TokenDialog(QDialog, TokenUI):
         server = self.comboBox_server_url.model().get_token(index)
         self.set_server(server)
 
-    def config_server_ux(self, server_model: EditableGroupTokenInfoWithServerModel, comboBox_server_url):
+    def config_server_ux(self, server_model: EditableGroupTokenInfoWithServerModel, comboBox_server_url, server_dialog, cb_open_server_dialog):
         # TODO: refactor into combobox server ux
         proxy_server_model = ComboBoxProxyModel(token_key="server", nonamed_token="")
         proxy_server_model.setSourceModel( server_model)
@@ -63,6 +63,9 @@ class TokenDialog(QDialog, TokenUI):
         self.comboBox_server_url.currentIndexChanged[int].connect(comboBox_server_url.setCurrentIndex)
         self.comboBox_server_url.currentIndexChanged[int].connect(self.cb_comboBox_server_selected)
 
+        self.server_dialog = server_dialog
+        _cb_open_server_dialog = cb_open_server_dialog.__get__(self, self.__class__)
+        self.btn_server.clicked.connect(_cb_open_server_dialog)
 
     def config(self, token_model: EditableGroupTokenInfoModel):
         self._config( token_model)
