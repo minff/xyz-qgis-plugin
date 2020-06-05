@@ -91,7 +91,7 @@ class TokenUX(UXDecorator):
         self.server_dialog = ServerDialog(self)
         self.server_dialog.config(server_model)
         
-        self.token_dialog.config_server_ux(server_model, self.comboBox_server_url, self.server_dialog, TokenUX.open_server_dialog)
+        self.token_dialog.config_server_ux(server_model, self.comboBox_server_url, self.server_dialog, TokenUX.open_server_dialog, TokenUX.cb_comboBox_server_selected)
 
         # self.comboBox_token.currentIndexChanged[int].connect(self.cb_comboxBox_token_selected)
         self.comboBox_token.currentIndexChanged[int].connect(self.ui_valid_input)

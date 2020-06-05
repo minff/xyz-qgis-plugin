@@ -10,9 +10,9 @@
 
 
 from .token_info_dialog import NewServerInfoDialog, EditServerInfoDialog
-from .token_dialog import TokenDialog
+from .token_dialog import BaseTokenDialog
 
-class ServerDialog(TokenDialog):
+class ServerDialog(BaseTokenDialog):
     title = "Hub Server Manager"
     message = ""
     token_info_keys = ["name", "server"]

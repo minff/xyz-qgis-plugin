@@ -14,11 +14,11 @@ from . import get_ui_class
 from ..xyz_qgis.models.filter_model import FilterModel
 from .util_dialog import ConfirmDialog
 from .filter_info_dialog import NewFilterInfoDialog, EditFilterInfoDialog
-from .token_dialog import TokenDialog
+from .token_dialog import BaseTokenDialog
 from qgis.PyQt.QtGui import QStandardItem
 
-class FilterDialog(TokenDialog):
-    # Extend TokenDialog
+class FilterDialog(BaseTokenDialog):
+    # Extend BaseTokenDialog
     # refactor tokendialog for resuability
 
     title = "Filter feature by property"

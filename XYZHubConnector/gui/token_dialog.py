@@ -18,7 +18,7 @@ from qgis.PyQt.QtGui import QStandardItem
 
 TokenUI = get_ui_class('token_dialog.ui')
 
-class TokenDialog(QDialog, TokenUI):
+class BaseTokenDialog(QDialog, TokenUI):
     title = "Token Manager"
     message = ""
     token_info_keys = ["name", "token"]
@@ -27,17 +27,12 @@ class TokenDialog(QDialog, TokenUI):
     
     def __init__(self, parent=None):
         """init window"""
-        self.comboBox_server_url = None
-        self.btn_server = None
         QDialog.__init__(self, parent)
         TokenUI.setupUi(self, self)
         self.setWindowTitle(self.title)
         if self.message:
             self.label_msg.setText(self.message)
             self.label_msg.setVisible(True)
-        is_token_dialog = "token" in self.token_info_keys
-        self.comboBox_server_url.setVisible(is_token_dialog)
-        self.btn_server.setVisible(is_token_dialog)
 
         self.is_used_token_changed = False
         self._active_idx = -1
@@ -46,26 +41,6 @@ class TokenDialog(QDialog, TokenUI):
     def set_server(self, server):
         self.token_model.set_server(server)
         self.token_model.reset_used_token_idx()
-
-    def cb_comboBox_server_selected(self, index):
-        server = self.comboBox_server_url.model().get_token(index)
-        self.set_server(server)
-
-    def config_server_ux(self, server_model: EditableGroupTokenInfoWithServerModel, comboBox_server_url, server_dialog, cb_open_server_dialog):
-        # TODO: refactor into combobox server ux
-        proxy_server_model = ComboBoxProxyModel(token_key="server", nonamed_token="")
-        proxy_server_model.setSourceModel( server_model)
-        proxy_server_model.set_keys(server_model.INFO_KEYS)
-        self.comboBox_server_url.setModel(proxy_server_model)
-        self.comboBox_server_url.setInsertPolicy(self.comboBox_server_url.NoInsert)
-        self.comboBox_server_url.setDuplicatesEnabled(False)
-
-        self.comboBox_server_url.currentIndexChanged[int].connect(comboBox_server_url.setCurrentIndex)
-        self.comboBox_server_url.currentIndexChanged[int].connect(self.cb_comboBox_server_selected)
-
-        self.server_dialog = server_dialog
-        _cb_open_server_dialog = cb_open_server_dialog.__get__(self, self.__class__)
-        self.btn_server.clicked.connect(_cb_open_server_dialog)
 
     def config(self, token_model: EditableGroupTokenInfoModel):
         self._config( token_model)
@@ -93,8 +68,6 @@ class TokenDialog(QDialog, TokenUI):
         # self.tableView.resizeColumnsToContents()
         # self.tableView.clearFocus()
         self.tableView.selectRow(self.get_active_idx())
-        if self.comboBox_server_url:
-            self.comboBox_server_url.setCurrentIndex(self.get_active_server_idx())
         self.ui_enable_btn()
         self.is_used_token_changed = False
         ret = super().exec_()
@@ -195,3 +168,36 @@ class TokenDialog(QDialog, TokenUI):
     def check_used_token_changed(self, idx):
         flag = idx == self.token_model.get_used_token_idx()
         self.is_used_token_changed = self.is_used_token_changed or flag
+
+class TokenDialog(BaseTokenDialog):
+    
+    def __init__(self, parent=None):
+        """init window"""
+        super().__init__(parent)
+        self.comboBox_server_url.setVisible(True)
+        self.btn_server.setVisible(True)
+
+    def exec_(self):
+        self.comboBox_server_url.setCurrentIndex(self.get_active_server_idx())
+        return super().exec_()
+
+    def cb_comboBox_server_selected(self, index):
+        server = self.comboBox_server_url.model().get_token(index)
+        self.set_server(server)
+
+    def config_server_ux(self, server_model: EditableGroupTokenInfoWithServerModel, comboBox_server_url, server_dialog, cb_open_server_dialog, cb_comboBox_server_selected):
+        # TODO: refactor into combobox server ux
+        proxy_server_model = ComboBoxProxyModel(token_key="server", nonamed_token="")
+        proxy_server_model.setSourceModel( server_model)
+        proxy_server_model.set_keys(server_model.INFO_KEYS)
+        self.comboBox_server_url.setModel(proxy_server_model)
+        self.comboBox_server_url.setInsertPolicy(self.comboBox_server_url.NoInsert)
+        self.comboBox_server_url.setDuplicatesEnabled(False)
+
+        _cb_comboBox_server_selected = cb_comboBox_server_selected.__get__(self, self.__class__)
+        self.comboBox_server_url.currentIndexChanged[int].connect(comboBox_server_url.setCurrentIndex)
+        self.comboBox_server_url.currentIndexChanged[int].connect(_cb_comboBox_server_selected)
+        
+        self.server_dialog = server_dialog
+        _cb_open_server_dialog = cb_open_server_dialog.__get__(self, self.__class__)
+        self.btn_server.clicked.connect(_cb_open_server_dialog)
