@@ -8,14 +8,9 @@
 #
 ###############################################################################
 
-from qgis.PyQt.QtWidgets import QDialog
-from . import get_ui_class
+from .base_token_dialog import BaseTokenDialog
+from .filter_info_dialog import EditFilterInfoDialog, NewFilterInfoDialog
 
-from ..xyz_qgis.models.filter_model import FilterModel
-from .util_dialog import ConfirmDialog
-from .filter_info_dialog import NewFilterInfoDialog, EditFilterInfoDialog
-from .token_dialog import BaseTokenDialog
-from qgis.PyQt.QtGui import QStandardItem
 
 class FilterDialog(BaseTokenDialog):
     # Extend BaseTokenDialog
@@ -43,5 +38,3 @@ class FilterDialog(BaseTokenDialog):
 
     def get_display_str(self):
         return self.token_model.get_display_str()
-        
-        

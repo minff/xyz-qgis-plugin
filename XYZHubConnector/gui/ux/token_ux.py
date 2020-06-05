@@ -14,11 +14,10 @@ from qgis.PyQt.QtCore import pyqtSignal
 from ...xyz_qgis.controller import make_qt_args
 from ...xyz_qgis.models import SpaceConnectionInfo
 from ...xyz_qgis.models.token_model import (
-    ComboBoxProxyModel, EditableGroupTokenInfoModel,
-    EditableGroupTokenInfoWithServerModel)
-from ..server_dialog import ServerDialog
+    ComboBoxProxyModel, EditableGroupTokenInfoModel)
 from ..token_dialog import TokenDialog
 from .ux import UXDecorator
+
 
 class SecretServerUX(UXDecorator):
     def __init__(self):
@@ -43,18 +42,18 @@ class SecretServerUX(UXDecorator):
         self._check_secret()
 
 class TokenUX(UXDecorator):
+    """ UX for Token comboBox with token button, use token button and connection info
+    """
     signal_use_token = pyqtSignal(object)
     def __init__(self):
         # these are like abstract variables
         self.comboBox_token = None
         self.btn_use = None
         self.btn_token = None
-        # self.btn_server = None
-        self.comboBox_server_url = None
-        self.comboBox_server = None
+        
         self.conn_info = None
-        #
-    def config(self, token_model: EditableGroupTokenInfoModel, server_model: EditableGroupTokenInfoWithServerModel):
+        
+    def config(self, token_model: EditableGroupTokenInfoModel):
         self.conn_info = SpaceConnectionInfo()
 
         self.token_model = token_model
@@ -63,43 +62,19 @@ class TokenUX(UXDecorator):
         proxy_model = ComboBoxProxyModel()
         proxy_model.setSourceModel( token_model)
         proxy_model.set_keys(token_model.INFO_KEYS)
-        
-        proxy_server_model = ComboBoxProxyModel(token_key="server", nonamed_token="")
-        proxy_server_model.setSourceModel( server_model)
-        proxy_server_model.set_keys(server_model.INFO_KEYS)
 
         self.comboBox_token.setModel( proxy_model)
         self.comboBox_token.setInsertPolicy(self.comboBox_token.NoInsert)
         self.comboBox_token.setDuplicatesEnabled(False)
-        
-        self.comboBox_server_url.setModel( proxy_server_model)
-        self.comboBox_server_url.setInsertPolicy(self.comboBox_server_url.NoInsert)
-        self.comboBox_server_url.setDuplicatesEnabled(False)
-
-        # self.comboBox_server.currentIndexChanged[str].connect(self.set_server)
-        # self.comboBox_server.currentIndexChanged[str].connect(self.ui_valid_input)
-
-        self.comboBox_server_url.currentIndexChanged[int].connect(self.cb_comboBox_server_selected)
-        self.comboBox_server_url.currentIndexChanged[int].connect(self.ui_valid_input)
-
-        token_model.set_server(self.comboBox_server.currentText())
-        self.conn_info.set_server(self.comboBox_server.currentText())
 
         self.token_dialog = TokenDialog(self)
         self.token_dialog.config(token_model)
 
-        self.server_dialog = ServerDialog(self)
-        self.server_dialog.config(server_model)
-        
-        self.token_dialog.config_server_ux(server_model, self.comboBox_server_url, self.server_dialog, TokenUX.open_server_dialog, TokenUX.cb_comboBox_server_selected)
-
-        # self.comboBox_token.currentIndexChanged[int].connect(self.cb_comboxBox_token_selected)
         self.comboBox_token.currentIndexChanged[int].connect(self.ui_valid_input)
         # self.comboBox_token.editTextChanged.connect(self.ui_valid_input)
 
         self.btn_use.clicked.connect(self.cb_token_used)
         self.btn_token.clicked.connect(self.open_token_dialog)
-        # self.btn_server.clicked.connect(self.open_server_dialog)
 
         self.comboBox_token.setCurrentIndex(0)
         self.ui_valid_input() # valid_input initially (explicit)
@@ -107,36 +82,16 @@ class TokenUX(UXDecorator):
     def open_token_dialog(self):
         idx = self.comboBox_token.currentIndex()
         self.token_dialog.set_active_idx(idx)
-        server_idx = self.comboBox_server_url.currentIndex()
-        self.token_dialog.set_active_server_idx(server_idx)
         self.token_dialog.exec_()
         idx = self.token_dialog.get_active_idx()
         self.comboBox_token.setCurrentIndex(idx)
         return self.token_dialog.is_used_token_changed
         
-    def open_server_dialog(self):
-        idx = self.comboBox_server_url.currentIndex()
-        self.server_dialog.set_active_idx(idx)
-        self.server_dialog.exec_()
-        idx = self.server_dialog.get_active_idx()
-        self.comboBox_server_url.setCurrentIndex(idx)
-        return self.server_dialog.is_used_token_changed
-
-    def set_server(self,server):
-        self.token_model.set_server(server)
-        self.conn_info.set_server(server)
-        self.token_model.reset_used_token_idx()
-        
     def get_input_token(self):
         proxy_model = self.comboBox_token.model()
         return proxy_model.get_token(self.comboBox_token.currentIndex())
     def get_input_server(self):
-        proxy_server_model = self.comboBox_server_url.model()
-        return proxy_server_model.get_token(self.comboBox_server_url.currentIndex())
-
-    def cb_comboBox_server_selected(self, index):
-        server = self.comboBox_server_url.model().get_token(index)
-        self.set_server(server)
+        return "PRD" # token_model.get_server()
 
     def cb_enable_token_ui(self,flag=True):
         txt_clicked = "Checking.."
@@ -146,8 +101,8 @@ class TokenUX(UXDecorator):
         elif self.btn_use.text() == txt_clicked:
             self.btn_use.setText(txt0)
         self.btn_use.setEnabled(flag)
-        self.comboBox_server.setEnabled(flag)
         self.comboBox_token.setEnabled(flag)
+
     def cb_token_used(self):
         token = self.get_input_token()
         server = self.get_input_server()
@@ -161,10 +116,6 @@ class TokenUX(UXDecorator):
         self.conn_info.set_(token=token, server=server)
         conn_info = SpaceConnectionInfo(self.conn_info)
         self.signal_use_token.emit( make_qt_args(conn_info) )
-    def cb_comboxBox_token_selected(self, index):
-        # DEPRECATED
-        flag_edit = True if index == 0 else False
-        self.comboBox_token.setEditable(flag_edit)
 
     def ui_valid_token(self, *a):
         """ Return true when token is used and shows Ok!
@@ -180,3 +131,6 @@ class TokenUX(UXDecorator):
         txt = "Ok!" if flag else "Connect"
         self.btn_use.setText(txt)
         return flag
+        
+    def ui_valid_input(self, *a):
+        return self.ui_valid_token()

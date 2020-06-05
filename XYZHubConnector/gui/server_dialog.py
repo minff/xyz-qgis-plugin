@@ -8,9 +8,9 @@
 #
 ###############################################################################
 
+from .base_token_dialog import BaseTokenDialog
+from .token_info_dialog import EditServerInfoDialog, NewServerInfoDialog
 
-from .token_info_dialog import NewServerInfoDialog, EditServerInfoDialog
-from .token_dialog import BaseTokenDialog
 
 class ServerDialog(BaseTokenDialog):
     title = "Hub Server Manager"
@@ -22,4 +22,3 @@ class ServerDialog(BaseTokenDialog):
     def _make_delete_message(self, token_info):
         token_msg = ", ".join("%s: %s"%it for it in token_info.items())
         return "Do you want to Delete server (%s)?"%token_msg
-        

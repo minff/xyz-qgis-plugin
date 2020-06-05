@@ -13,9 +13,10 @@ from qgis.PyQt.QtCore import QSortFilterProxyModel, pyqtSignal
 
 from ...xyz_qgis.models import SpaceConnectionInfo, XYZSpaceModel
 from ...xyz_qgis.controller import make_qt_args
-from .token_ux import TokenUX
+from .token_server_ux import TokenWithServerUX
 
-class SpaceUX(TokenUX):
+
+class SpaceUX(TokenWithServerUX):
     """ Base dialog that contains table view of spaces + Token UX
     """
     signal_space_count = pyqtSignal(object)
@@ -39,7 +40,7 @@ class SpaceUX(TokenUX):
         self.tableView_space.selectionModel().currentChanged.connect(self.cb_table_row_selected)
         
         self.btn_use.clicked.connect(self._get_space_model().reset)
-        TokenUX.config(self,token_model,server_model)
+        TokenWithServerUX.config(self, token_model, server_model)
 
     def _get_proxy_model(self):
         return self.tableView_space.model()
