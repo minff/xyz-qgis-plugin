@@ -44,6 +44,13 @@ class EditableGroupTokenInfoModel(QStandardItemModel, UsedToken):
         self._config_callback() # persistent
         self.group_key = "PRD"
 
+    def update_from_model(self, other_model):
+        self.token_groups.read_dict(other_model.get_dict())
+
+    def get_dict(self):
+        # return dict(self.token_groups._sections)
+        return {s: dict(self.token_groups.items(s)) for s in self.token_groups.sections()}
+        
     def load_ini(self, ini):
         self._load_ini(ini)
         self.ini = ini # must be after loaded

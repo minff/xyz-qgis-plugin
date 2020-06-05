@@ -33,7 +33,18 @@ class TokenDialog(BaseTokenDialog, ServerUX):
 
     def config_server(self, server_model: EditableGroupTokenInfoWithServerModel, comboBox_server_url):
         ServerUX.config(self, server_model)
+        self.server_model = server_model
         
         self.comboBox_server_url.currentIndexChanged[int].connect(comboBox_server_url.setCurrentIndex)
         self.btn_server.clicked.connect(self.open_server_dialog)
         
+    def cb_comboBox_server_selected(self, index):
+        ServerUX.cb_comboBox_server_selected(self, index)
+        self.tableView.selectRow(0)
+        self.ui_enable_btn()
+        
+    def open_server_dialog(self):
+        ret = super().open_server_dialog()
+        self.token_model.update_from_model(self.server_model)
+        # self.token_model._load_ini(self.token_model.ini)
+        return ret

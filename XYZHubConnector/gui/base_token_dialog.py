@@ -35,8 +35,8 @@ class BaseTokenDialog(QDialog, TokenUI):
             self.label_msg.setVisible(True)
 
         self.is_used_token_changed = False
-        self._active_idx = -1
-        self._active_server_idx = -1
+        self._active_idx = 0
+        self._active_server_idx = 0
 
     def set_server(self, server):
         self.token_model.set_server(server)

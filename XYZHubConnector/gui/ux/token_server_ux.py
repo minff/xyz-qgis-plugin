@@ -27,7 +27,9 @@ class TokenWithServerUX(TokenUX, ServerUX):
 
         self.token_dialog.config_server(server_model, self.comboBox_server_url)
 
-
+        # explicitly init ui
+        self.comboBox_server_url.setCurrentIndex(-1)
+        self.comboBox_server_url.setCurrentIndex(0) 
         self.comboBox_token.setCurrentIndex(0)
         self.ui_valid_input() # valid_input initially (explicit)
 
