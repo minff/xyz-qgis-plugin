@@ -114,13 +114,13 @@ class EditableGroupTokenInfoModel(QStandardItemModel, UsedToken):
 
     def deserialize_line(self, line):
         infos = line.split(self.DELIM,maxsplit=1)
-        return dict(zip(self.SERIALIZE_KEYS, infos))
+        return dict(zip(self.SERIALIZE_KEYS, map(str.strip, infos)))
 
     def serialize_token_row(self, row):
         return self.serialize_token_info(self.get_token_info(row))
 
     def serialize_token_info(self, token_info):
-        lst_txt = [token_info.get(k,"") for k in self.SERIALIZE_KEYS]
+        lst_txt = [token_info.get(k,"").strip() for k in self.SERIALIZE_KEYS]
         return self.DELIM.join(lst_txt)
 
 
