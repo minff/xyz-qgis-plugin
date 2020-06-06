@@ -20,7 +20,7 @@ class FilterModel(EditableGroupTokenInfoModel):
     DELIM = ","
 
     def __init__(self, parent=None):
-        super().__init__(parent)        
+        super().__init__(parent=parent)        
         self.filters = list()
         self._refresh_token()
         

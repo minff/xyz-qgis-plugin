@@ -37,20 +37,14 @@ class EditableGroupTokenInfoModel(QStandardItemModel, UsedToken):
     TOKEN_KEY = "token"
     DELIM = ","
 
-    def __init__(self, parent=None):
+    def __init__(self, token_groups: configparser.ConfigParser = None, parent=None):
         super().__init__(parent)
         UsedToken.__init__(self)
         self.ini = ""
         self._config_callback() # persistent
         self.group_key = "PRD"
+        self.token_groups = token_groups
 
-    def update_from_model(self, other_model):
-        self.token_groups.read_dict(other_model.get_dict())
-
-    def get_dict(self):
-        # return dict(self.token_groups._sections)
-        return {s: dict(self.token_groups.items(s)) for s in self.token_groups.sections()}
-        
     def load_ini(self, ini):
         self._load_ini(ini)
         self.ini = ini # must be after loaded
@@ -99,12 +93,9 @@ class EditableGroupTokenInfoModel(QStandardItemModel, UsedToken):
             ])
 
     def _load_ini(self, ini):
-        token_groups = configparser.ConfigParser(allow_no_value=True,delimiters=("*",))
-        token_groups.optionxform = str
         with open(ini,"a+") as f:
             f.seek(0)
-            token_groups.read_file(f)
-        self.token_groups = token_groups
+            self.token_groups.read_file(f)
 
     def get_text(self, row, col):
         it = self.item(row, col)
@@ -190,10 +181,11 @@ class EditableGroupTokenInfoWithServerModel(EditableGroupTokenInfoModel):
     SERIALIZE_KEYS = ["server","name"]
     TOKEN_KEY = "server"
 
-    def __init__(self, parent=None):
+    def __init__(self, token_groups: configparser.ConfigParser = None, parent=None):
         super().__init__(parent)
         self.group_key = "servers"
         self.set_server = lambda a: None
+        self.token_groups = token_groups
     
     def set_default_servers(self, default_api_urls):
         self.default_api_urls = default_api_urls
@@ -230,6 +222,31 @@ class EditableGroupTokenInfoWithServerModel(EditableGroupTokenInfoModel):
                 )
             ])
         self.cb_write_token()
+
+class ServerTokenConfig():
+    def __init__(self, ini, parent=None):
+        self.parent = parent
+        self.ini = ini
+        cfg = configparser.ConfigParser(allow_no_value=True, delimiters=("*",))
+        cfg.optionxform = str
+        self.cfg = cfg
+        self.default_api_urls = dict()
+
+    def get_server_model(self):
+        model = EditableGroupTokenInfoWithServerModel(self.cfg, self.parent)
+        model.load_ini(self.ini)
+        model.set_default_servers(self.default_api_urls)
+        return model
+        
+    def get_token_model(self):
+        model = EditableGroupTokenInfoModel(self.cfg, self.parent)
+        model.load_ini(self.ini)
+        model.set_default_servers(self.default_api_urls)
+        return model
+
+    def set_default_servers(self, default_api_urls):
+        self.default_api_urls = default_api_urls
+
 
 class ComboBoxProxyModel(QIdentityProxyModel):
     def __init__(self, token_key="token", named_token="{name}", nonamed_token="<noname token> {token}"):

@@ -25,7 +25,7 @@ from .gui.space_dialog import MainDialog
 from .gui.space_info_dialog import EditSpaceDialog
 from .gui.util_dialog import ConfirmDialog, exec_warning_dialog
 
-from .xyz_qgis.models import SpaceConnectionInfo, EditableGroupTokenInfoModel, EditableGroupTokenInfoWithServerModel, LOADING_MODES, InvalidLoadingMode
+from .xyz_qgis.models import SpaceConnectionInfo, EditableGroupTokenInfoModel, EditableGroupTokenInfoWithServerModel, ServerTokenConfig, LOADING_MODES, InvalidLoadingMode
 from .xyz_qgis.controller import ChainController
 from .xyz_qgis.controller import AsyncFun, parse_qt_args, make_qt_args, make_fun_args, parse_exception_obj, ChainInterrupt
 from .xyz_qgis.loader import (LoaderManager, EmptyXYZSpaceError, ManualInterrupt, InitUploadLayerController, 
@@ -171,9 +171,6 @@ class XYZHubConnector(object):
         self.map_basemap_meta = basemap.load_default_xml()
         self.auth_manager = AuthManager(config.USER_PLUGIN_DIR +"/auth.ini")
         
-        self.token_model = EditableGroupTokenInfoModel(parent)
-        self.server_model = EditableGroupTokenInfoWithServerModel(parent)
-
         self.network = NetManager(parent)
         
         self.con_man = LoaderManager()
@@ -183,10 +180,10 @@ class XYZHubConnector(object):
         # self.conn_info = SpaceConnectionInfo()
         
         ######## token      
-        self.token_model.load_ini(config.USER_PLUGIN_DIR +"/token.ini")
-        self.server_model.load_ini(config.USER_PLUGIN_DIR +"/token.ini")
-        self.token_model.set_default_servers(net_utils.API_URL)
-        self.server_model.set_default_servers(net_utils.API_URL)
+        self.token_config = ServerTokenConfig(config.USER_PLUGIN_DIR +"/token.ini", parent)
+        self.token_config.set_default_servers(net_utils.API_URL)
+        self.token_model = self.token_config.get_token_model()
+        self.server_model = self.token_config.get_server_model()
 
         ######## CALLBACK
         
