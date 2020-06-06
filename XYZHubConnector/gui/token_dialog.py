@@ -32,9 +32,9 @@ class TokenDialog(BaseTokenDialog, ServerUX):
         BaseTokenDialog.config(self, token_model)
 
     def config_server(self, server_model: EditableGroupTokenInfoWithServerModel, comboBox_server_url):
-        ServerUX.config(self, server_model)
-        
         self.comboBox_server_url.currentIndexChanged[int].connect(comboBox_server_url.setCurrentIndex)
+        ServerUX.config(self, server_model) # trigger outer server combo box first
+        
         self.btn_server.clicked.connect(self.open_server_dialog)
         
     def cb_comboBox_server_selected(self, index):
