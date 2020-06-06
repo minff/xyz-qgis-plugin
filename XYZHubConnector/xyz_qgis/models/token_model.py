@@ -159,6 +159,9 @@ class EditableGroupTokenInfoModel(QStandardItemModel, UsedToken):
             if token.startswith("[]"): print(token)
             self.token_groups.set(self.group_key, token)
         tokens = self.token_groups.options(self.group_key)
+        # clean unwanted sections
+        for s in self.token_groups.sections():
+            if not s: self.token_groups.remove_section(s)
         self._write_to_file()
 
     def _cb_remove_token_from_file(self, root, i0, i1):
