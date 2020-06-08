@@ -51,19 +51,17 @@ class SpaceUX(TokenWithServerUX):
         return self._get_proxy_model().mapToSource(index)
         
     def open_token_dialog(self):
-        is_used_token_changed = super().open_token_dialog()
-        if not is_used_token_changed: return
+        is_used_token_modified = super().open_token_dialog()
+        if not is_used_token_modified: return
 
         self._get_space_model().reset()
-        self.token_model.reset_used_token_idx()
         self.ui_valid_input()
 
     def open_server_dialog(self):
-        is_used_server_changed = super().open_server_dialog()
-        if not is_used_server_changed: return
+        is_used_token_modified = super().open_server_dialog()
+        if not is_used_token_modified: return
 
         self._get_space_model().reset()
-        self.token_model.reset_used_token_idx()
         self.ui_valid_input()
 
     ##### CALLBACK
@@ -93,6 +91,10 @@ class SpaceUX(TokenWithServerUX):
         index = self._get_current_index()
         self._get_space_model().set_feat_count(space_id, cnt)
         self.tableView_space.setCurrentIndex(index)
+
+    def cb_comboBox_server_selected(self, index):
+        super().cb_comboBox_server_selected(index)
+        self._get_space_model().reset()
 
     ###### UI function
     def ui_display_spaces(self, obj):

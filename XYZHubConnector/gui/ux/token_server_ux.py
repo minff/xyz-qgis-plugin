@@ -47,7 +47,6 @@ class TokenWithServerUX(TokenUX, ServerUX):
         """
         self.conn_info.set_server(server)
         self.token_model.set_server(server)
-        self.token_model.reset_used_token_idx()
 
     def get_input_server(self):
         return ServerUX.get_input_server(self)

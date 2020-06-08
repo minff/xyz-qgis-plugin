@@ -85,7 +85,7 @@ class TokenUX(UXDecorator):
         self.token_dialog.exec_()
         idx = self.token_dialog.get_active_idx()
         self.comboBox_token.setCurrentIndex(idx)
-        return self.token_dialog.is_used_token_changed
+        return self.token_model.is_used_token_modified()
         
     def get_input_token(self):
         proxy_model = self.comboBox_token.model()
@@ -124,10 +124,7 @@ class TokenUX(UXDecorator):
         self.btn_use.setEnabled(flag_token)
         # self.btn_clear_token.setEnabled(flag_token)
         idx = self.comboBox_token.currentIndex()
-        flag = (
-            idx != self.token_model.get_invalid_token_idx()
-            and idx == self.token_model.get_used_token_idx()
-        )
+        flag = self.token_model.is_used_token_idx(idx)
         txt = "Ok!" if flag else "Connect"
         self.btn_use.setText(txt)
         return flag

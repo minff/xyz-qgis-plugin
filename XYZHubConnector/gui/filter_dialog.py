@@ -38,3 +38,6 @@ class FilterDialog(BaseTokenDialog):
 
     def get_display_str(self):
         return self.token_model.get_display_str()
+
+    def modify_token_idx(self, idx):
+        pass

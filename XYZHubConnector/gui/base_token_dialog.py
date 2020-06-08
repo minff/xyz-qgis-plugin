@@ -34,13 +34,11 @@ class BaseTokenDialog(QDialog, TokenUI):
             self.label_msg.setText(self.message)
             self.label_msg.setVisible(True)
 
-        self.is_used_token_changed = False
         self._active_idx = 0
         self._active_server_idx = 0
 
     def set_server(self, server):
         self.token_model.set_server(server)
-        self.token_model.reset_used_token_idx()
 
     def config(self, token_model: EditableGroupTokenInfoModel):
         self._config( token_model)
@@ -61,18 +59,16 @@ class BaseTokenDialog(QDialog, TokenUI):
     def _config(self, token_model: EditableGroupTokenInfoModel):
         self.token_model = token_model
         self.tableView.setModel( token_model)
-        self.accepted.connect( token_model.cb_write_token)
-        self.rejected.connect( token_model.cb_refresh_token)
+        self.accepted.connect( token_model.submit_cache)
+        self.rejected.connect( token_model.refresh_model)
         
     def exec_(self):
         # self.tableView.resizeColumnsToContents()
         # self.tableView.clearFocus()
         self.tableView.selectRow(self.get_active_idx())
         self.ui_enable_btn()
-        self.is_used_token_changed = False
         ret = super().exec_()
         if ret == self.Accepted:
-            self.is_used_token_changed = True
             idx = self.tableView.currentIndex().row()
             if idx >= 0: self.set_active_idx(idx)
         return ret
@@ -97,7 +93,7 @@ class BaseTokenDialog(QDialog, TokenUI):
 
     def _get_current_token_info(self):
         row = self.tableView.currentIndex().row()
-        return self.token_model.get_token_info(row)
+        return self.token_model.get_data(row)
 
     def _make_delete_message(self, token_info):
         token_msg = ", ".join("%s: %s"%it for it in token_info.items())
@@ -105,50 +101,50 @@ class BaseTokenDialog(QDialog, TokenUI):
         
     def ui_add_token(self):
         dialog = self.NewInfoDialog(self)
-        dialog.accepted.connect(lambda: self._add_token(
-            dialog.get_info()
-        ))
-        dialog.exec_()
+        ret = dialog.exec_()
+        if ret != dialog.Accepted: return
+
+        self._add_token(dialog.get_info())
         self.tableView.selectRow(self.token_model.rowCount()-1)
 
     def ui_edit_token(self):
         dialog = self.EditInfoDialog(self)
         token_info = self._get_current_token_info()
         dialog.set_info(token_info)
-        dialog.accepted.connect(lambda: self._edit_token(
-            dialog.get_info()
-        ))
-        dialog.exec_()
+        ret = dialog.exec_()
+        if ret != dialog.Accepted: return
+
+        self._edit_token(dialog.get_info())
 
     def ui_delete_token(self):
         row = self.tableView.currentIndex().row()
-        token_info = self.token_model.get_token_info(row)
+        token_info = self.token_model.get_data(row)
         dialog = ConfirmDialog(self._make_delete_message(token_info))
         ret = dialog.exec_()
         if ret != dialog.Ok: return
 
         self.token_model.takeRow(row)
-        self.check_used_token_changed(row)
+        self.modify_token_idx(row)
 
     def ui_move_token_up(self):
         row = self.tableView.currentIndex().row()
         it = self.token_model.takeRow(row)
-        self.check_used_token_changed(row)
+        self.modify_token_idx(row)
 
         row = max(row-1,0)
         self.token_model.insertRow(max(row,0), it)
         self.tableView.selectRow(row)
-        self.check_used_token_changed(row)
+        self.modify_token_idx(row)
 
     def ui_move_token_down(self):
         row = self.tableView.currentIndex().row()
         it = self.token_model.takeRow(row)
-        self.check_used_token_changed(row)
+        self.modify_token_idx(row)
 
         row = min(row+1, self.token_model.rowCount())
         self.token_model.insertRow(row, it)
         self.tableView.selectRow(row)
-        self.check_used_token_changed(row)
+        self.modify_token_idx(row)
 
     def _add_token(self, token_info: dict):
         self.token_model.appendRow([
@@ -163,8 +159,7 @@ class BaseTokenDialog(QDialog, TokenUI):
             for k in self.token_info_keys
         ])
         it = self.token_model.takeRow(row)
-        self.check_used_token_changed(row)
+        self.modify_token_idx(row)
         
-    def check_used_token_changed(self, idx):
-        flag = idx == self.token_model.get_used_token_idx()
-        self.is_used_token_changed = self.is_used_token_changed or flag
+    def modify_token_idx(self, idx):
+        self.token_model.modify_token_idx(idx)

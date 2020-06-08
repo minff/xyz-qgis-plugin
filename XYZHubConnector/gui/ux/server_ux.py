@@ -25,6 +25,7 @@ class ServerUX(UXDecorator):
         self.comboBox_server_url = None
 
     def config(self, server_model):
+        self.server_model = server_model
 
         proxy_server_model = ComboBoxProxyModel(token_key="server", nonamed_token="")
         proxy_server_model.setSourceModel( server_model)
@@ -46,9 +47,10 @@ class ServerUX(UXDecorator):
         self.server_dialog.exec_()
         idx = self.server_dialog.get_active_idx()
         self.comboBox_server_url.setCurrentIndex(idx)
-        return self.server_dialog.is_used_token_changed
+        return self.server_model.is_used_token_modified()
 
     def cb_comboBox_server_selected(self, index):
+        if index < 0: return
         server = self.comboBox_server_url.model().get_token(index)
         self.set_server(server)
         
