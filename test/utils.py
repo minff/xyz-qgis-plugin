@@ -95,14 +95,21 @@ class BaseTestAsync(unittest.TestCase):
     def _make_async_fun(self, fun):
         return AsyncFun(fun)
         
-    def _log_info(self, *a,**kw):
+    def _log_error(self, *a,**kw):
         print(*a, file = sys.stderr, **kw)
+    def _log_info(self, *a,**kw):
+        log_truncate(*a, **kw)
     def _log_debug(self, *a,**kw):
-        fn_name = str(self._id())
+        fn_name = "{}:".format(self._id())
         # fn_name = sys._getframe(1).f_code.co_name
-        log_debug(fn_name,*a, **kw)
+        log_truncate(fn_name, *a, **kw)
     def _id(self):
         return self._subtest.id() if self._subtest else self.id()
+        
+    def assertMultiInput(self, expected, lst_input, msg="multi input"):
+        for i, actual in enumerate(lst_input):
+            self.assertEqual(actual, expected, "{} [{}]".format(msg,i))
+
     #unused        
     def assertPairEqual(self, *a):
         pairs = [a[i:i+2] for i in range(0,len(a),2)]
@@ -136,11 +143,15 @@ class BaseTestWorkerAsync(BaseTestAsync):
 def format_long_args(*a, limit=200):
     return " ".join(str(i)[:limit] for i in a)
 
-def log_debug(*a,**kw):
+def log_truncate(*a,**kw):
     # return
     # print(*a,**kw)
     s = format_long_args(*a)
     print(s,**kw)
+
+def log_truncate_timestamp(*a,**kw):
+    ts = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    log_truncate(ts, *a, **kw)
 
 def len_of_struct(x, strict=True):
     if isinstance(x, dict):
