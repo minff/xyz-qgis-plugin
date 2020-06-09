@@ -48,9 +48,9 @@ class TokenInfoDialog(NameValueDialog):
         self.lineEdit_token.setText(token_info.get("token",""))
         
 class NewTokenInfoDialog(TokenInfoDialog):
-    title = "Add new token"
+    title = "Add New XYZ Hub Token"
 class EditTokenInfoDialog(TokenInfoDialog):
-    title = "Edit token"
+    title = "Edit XYZ Hub Token"
 
 
 class ServerInfoDialog(NameValueDialog):
@@ -66,7 +66,7 @@ class ServerInfoDialog(NameValueDialog):
         self.lineEdit_token.setText(token_info.get("server",""))
         
 class NewServerInfoDialog(ServerInfoDialog):
-    title = "Add new server"
+    title = "Add New XYZ Hub Server"
     
 class EditServerInfoDialog(ServerInfoDialog):
-    title = "Edit server"
+    title = "Edit XYZ Hub Server"

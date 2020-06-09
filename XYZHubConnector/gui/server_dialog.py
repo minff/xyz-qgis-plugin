@@ -13,7 +13,7 @@ from .token_info_dialog import EditServerInfoDialog, NewServerInfoDialog
 
 
 class ServerDialog(BaseTokenDialog):
-    title = "Hub Server Manager"
+    title = "Setup XYZ Hub Server"
     message = ""
     token_info_keys = ["name", "server"]
     NewInfoDialog = NewServerInfoDialog

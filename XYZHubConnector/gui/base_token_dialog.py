@@ -19,7 +19,7 @@ from .util_dialog import ConfirmDialog
 TokenUI = get_ui_class('token_dialog.ui')
 
 class BaseTokenDialog(QDialog, TokenUI):
-    title = "Token Manager"
+    title = "Setup XYZ Hub Token"
     message = ""
     token_info_keys = ["name", "token"]
     NewInfoDialog = NewTokenInfoDialog

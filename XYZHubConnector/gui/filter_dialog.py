@@ -16,7 +16,7 @@ class FilterDialog(BaseTokenDialog):
     # Extend BaseTokenDialog
     # refactor tokendialog for resuability
 
-    title = "Filter feature by property"
+    title = "Query Features By Property"
     message = "Multiple property names represent AND operation. Multiple values represent OR operation."
     token_info_keys = ["name", "operator", "values"]
     NewInfoDialog = NewFilterInfoDialog

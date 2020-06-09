@@ -75,6 +75,6 @@ class FilterInfoDialog(QDialog, FilterEditUI):
         self.comboBox_operator.setCurrentIndex(idx)
         
 class NewFilterInfoDialog(FilterInfoDialog):
-    title = "Add new property filter"
+    title = "Add New Property Query"
 class EditFilterInfoDialog(FilterInfoDialog):
-    title = "Edit property filter"
+    title = "Edit Property Query"

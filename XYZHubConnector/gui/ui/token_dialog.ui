@@ -30,7 +30,7 @@
       </sizepolicy>
      </property>
      <property name="toolTip">
-      <string>Data Hub Server</string>
+      <string>XYZ Hub Server</string>
      </property>
      <property name="editable">
       <bool>false</bool>

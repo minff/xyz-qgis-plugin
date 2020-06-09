@@ -22,7 +22,7 @@ from .ux import strip_list_string
 class ConnectUX(SpaceUX):
     """ Dialog that contains table view of spaces + Token UX + Param input + Connect UX
     """
-    title="Create a new XYZ Hub Connection"
+    title="XYZ Hub Connection"
     signal_space_connect = pyqtSignal(object)
     signal_space_bbox = pyqtSignal(object) # deprecate
     signal_space_tile = pyqtSignal(object)

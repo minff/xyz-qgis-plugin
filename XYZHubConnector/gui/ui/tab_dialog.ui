@@ -171,7 +171,7 @@
             </sizepolicy>
            </property>
            <property name="toolTip">
-            <string>Data Hub Token</string>
+            <string>XYZ Hub Token</string>
            </property>
            <property name="editable">
             <bool>false</bool>
@@ -196,7 +196,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Data Hub Server</string>
+            <string>XYZ Hub Server</string>
            </property>
            <property name="editable">
             <bool>false</bool>
