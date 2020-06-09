@@ -13,8 +13,8 @@ from test.utils import BaseTestAsync, TestFolder
 from qgis.PyQt.QtGui import QStandardItem
 from qgis.testing import unittest
 from XYZHubConnector.xyz_qgis.models.token_model import (
-    ConfigParserMixin, EditableGroupTokenInfoModel,
-    EditableGroupTokenInfoWithServerModel, make_config_parser)
+    ConfigParserMixin, TokenModel,
+    ServerModel, make_config_parser)
 
 
 # import unittest
@@ -24,7 +24,7 @@ class TestTokenModel(BaseTestAsync):
         folder = TestFolder()
         folder.save("token.ini", "")
         ini = folder.fullpath("token.ini")
-        token_model = EditableGroupTokenInfoModel(ini)
+        token_model = TokenModel(ini)
         token_model.load_from_file()
         
         input_token_info = [dict(name="somename", token="helloworldtoken")]
@@ -43,7 +43,7 @@ class TestTokenModel(BaseTestAsync):
         folder = TestFolder()
         folder.save("token.ini", txt)
         ini = folder.fullpath("token.ini")
-        token_model = EditableGroupTokenInfoModel(ini)
+        token_model = TokenModel(ini)
         token_model.load_from_file()
         self.assertEqual({
             'A': [{'token': 'A0'}, {'token': 'A1'}, {'token': 'A2'}], 
@@ -62,7 +62,7 @@ class TestTokenModel(BaseTestAsync):
         folder = TestFolder()
         folder.save("token.ini", "")
         ini = folder.fullpath("token.ini")
-        token_model = EditableGroupTokenInfoModel(ini)
+        token_model = TokenModel(ini)
         token_model.load_from_file()
 
         server_env_url = dict(PRD="https://hub-server-prd.com/hub",CIT="https://hub-server-cit.com/hub")
@@ -94,7 +94,7 @@ class TestTokenModel(BaseTestAsync):
         folder = TestFolder()
         folder.save("token.ini", "")
         ini = folder.fullpath("token.ini")
-        token_model = EditableGroupTokenInfoModel(ini)
+        token_model = TokenModel(ini)
         token_model.load_from_file()
 
         server_env_url = dict(PRD="https://hub-server-prd.com/hub")

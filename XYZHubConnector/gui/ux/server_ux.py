@@ -10,8 +10,8 @@
 
 
 from ...xyz_qgis.models.token_model import (
-    ComboBoxProxyModel, EditableGroupTokenInfoModel,
-    EditableGroupTokenInfoWithServerModel)
+    ComboBoxProxyModel, TokenModel,
+    ServerModel)
 from ..server_dialog import ServerDialog
 from .ux import UXDecorator
 

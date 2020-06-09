@@ -11,7 +11,7 @@
 from qgis.PyQt.QtGui import QStandardItem
 from qgis.PyQt.QtWidgets import QDialog
 
-from ..xyz_qgis.models.token_model import EditableGroupTokenInfoModel
+from ..xyz_qgis.models.token_model import TokenModel
 from . import get_ui_class
 from .token_info_dialog import EditTokenInfoDialog, NewTokenInfoDialog
 from .util_dialog import ConfirmDialog
@@ -40,7 +40,7 @@ class BaseTokenDialog(QDialog, TokenUI):
     def set_server(self, server):
         self.token_model.set_server(server)
 
-    def config(self, token_model: EditableGroupTokenInfoModel):
+    def config(self, token_model: TokenModel):
         self._config( token_model)
         self.tableView.setSelectionMode(self.tableView.SingleSelection)
         self.tableView.setSelectionBehavior(self.tableView.SelectRows)
@@ -56,7 +56,7 @@ class BaseTokenDialog(QDialog, TokenUI):
         self.btn_up.clicked.connect( self.ui_move_token_up)
         self.btn_down.clicked.connect( self.ui_move_token_down)
 
-    def _config(self, token_model: EditableGroupTokenInfoModel):
+    def _config(self, token_model: TokenModel):
         self.token_model = token_model
         self.tableView.setModel( token_model)
         self.accepted.connect( token_model.submit_cache)

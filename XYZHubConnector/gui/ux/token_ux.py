@@ -14,7 +14,7 @@ from qgis.PyQt.QtCore import pyqtSignal
 from ...xyz_qgis.controller import make_qt_args
 from ...xyz_qgis.models import SpaceConnectionInfo
 from ...xyz_qgis.models.token_model import (
-    ComboBoxProxyModel, EditableGroupTokenInfoModel)
+    ComboBoxProxyModel, TokenModel)
 from ..token_dialog import TokenDialog
 from .ux import UXDecorator
 
@@ -53,7 +53,7 @@ class TokenUX(UXDecorator):
         
         self.conn_info = None
         
-    def config(self, token_model: EditableGroupTokenInfoModel):
+    def config(self, token_model: TokenModel):
         self.conn_info = SpaceConnectionInfo()
 
         self.token_model = token_model

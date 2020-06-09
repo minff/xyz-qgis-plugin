@@ -10,8 +10,8 @@
 
 
 from ..xyz_qgis.models.token_model import (
-    EditableGroupTokenInfoModel,
-    EditableGroupTokenInfoWithServerModel)
+    TokenModel,
+    ServerModel)
 from .base_token_dialog import BaseTokenDialog
 from .ux.server_ux import ServerUX
 
@@ -28,10 +28,10 @@ class TokenDialog(BaseTokenDialog, ServerUX):
         self.comboBox_server_url.setCurrentIndex(self.get_active_server_idx())
         return super().exec_()
 
-    def config(self, token_model: EditableGroupTokenInfoModel):
+    def config(self, token_model: TokenModel):
         BaseTokenDialog.config(self, token_model)
 
-    def config_server(self, server_model: EditableGroupTokenInfoWithServerModel, comboBox_server_url):
+    def config_server(self, server_model: ServerModel, comboBox_server_url):
         self.comboBox_server_url.currentIndexChanged[int].connect(comboBox_server_url.setCurrentIndex)
         ServerUX.config(self, server_model) # trigger outer server combo box first
         

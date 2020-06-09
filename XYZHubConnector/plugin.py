@@ -25,7 +25,7 @@ from .gui.space_dialog import MainDialog
 from .gui.space_info_dialog import EditSpaceDialog
 from .gui.util_dialog import ConfirmDialog, exec_warning_dialog
 
-from .xyz_qgis.models import SpaceConnectionInfo, EditableGroupTokenInfoModel, EditableGroupTokenInfoWithServerModel, ServerTokenConfig, LOADING_MODES, InvalidLoadingMode
+from .xyz_qgis.models import SpaceConnectionInfo, TokenModel, ServerModel, ServerTokenConfig, LOADING_MODES, InvalidLoadingMode
 from .xyz_qgis.controller import ChainController
 from .xyz_qgis.controller import AsyncFun, parse_qt_args, make_qt_args, make_fun_args, parse_exception_obj, ChainInterrupt
 from .xyz_qgis.loader import (LoaderManager, EmptyXYZSpaceError, ManualInterrupt, InitUploadLayerController, 

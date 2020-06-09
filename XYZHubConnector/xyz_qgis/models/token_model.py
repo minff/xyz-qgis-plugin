@@ -244,7 +244,7 @@ class WritableItemModel(GroupEditableItemModel):
         self.parser.update_config(self.get_submitted_data())
         self.parser.write_to_file()
 
-class EditableGroupTokenInfoModel(WritableItemModel, UsedToken):
+class TokenModel(WritableItemModel, UsedToken):
     """ Grouped Token Model, Cached changes and write to file at the end
     """
     INFO_KEYS = ["name","token"]
@@ -276,7 +276,7 @@ class EditableGroupTokenInfoModel(WritableItemModel, UsedToken):
     def get_server_url(self):
         return self.default_api_urls.get(self.group_key, self.group_key)
 
-class EditableGroupTokenInfoWithServerModel(WritableItemModel, UsedToken):
+class ServerModel(WritableItemModel, UsedToken):
     INFO_KEYS = ["name","server"]
     SERIALIZE_KEYS = ["server","name"]
     TOKEN_KEY = "server"
@@ -334,13 +334,13 @@ class ServerTokenConfig():
         self.default_api_urls = dict()
 
     def get_server_model(self):
-        model = EditableGroupTokenInfoWithServerModel(self.ini, self.parser, self.parent)
+        model = ServerModel(self.ini, self.parser, self.parent)
         model.load_from_file()
         model.set_default_servers(self.default_api_urls)
         return model
         
     def get_token_model(self):
-        model = EditableGroupTokenInfoModel(self.ini, self.parser, self.parent)
+        model = TokenModel(self.ini, self.parser, self.parent)
         model.load_from_file()
         model.set_default_servers(self.default_api_urls)
         return model
