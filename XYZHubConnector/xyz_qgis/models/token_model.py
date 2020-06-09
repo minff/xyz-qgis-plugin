@@ -46,6 +46,12 @@ class UsedToken():
     def is_used_token_modified(self):
         return self._is_used_token_changed
 
+def make_config_parser():
+    """ ConfigParser for managing token/server
+    """
+    parser = configparser.ConfigParser(allow_no_value=True, delimiters=("*",))
+    parser.optionxform = str
+    return parser
 
 class EditableItemModel(QStandardItemModel):
     INFO_KEYS = []
@@ -238,11 +244,14 @@ class WritableItemModel(GroupEditableItemModel):
         self.from_dict(self.parser.get_config())
         self._refresh_model()
 
-    def _submit_cache(self):
-        super()._submit_cache()
+    def write_to_file(self):
+        self._submit_cache()
         # print(self.get_submitted_data().keys())
         self.parser.update_config(self.get_submitted_data())
         self.parser.write_to_file()
+
+    def submit_cache(self):
+        self.write_to_file()
 
 class TokenModel(WritableItemModel, UsedToken):
     """ Grouped Token Model, Cached changes and write to file at the end
@@ -254,12 +263,12 @@ class TokenModel(WritableItemModel, UsedToken):
         super().__init__(ini, parser, parent)
         UsedToken.__init__(self)
         self._set_group("PRD")
-        self.default_api_urls = dict()
-        self.default_api_envs = dict()
 
     def set_default_servers(self, default_api_urls):
-        self.default_api_urls = default_api_urls
-        self.default_api_envs = {v:k for k, v in default_api_urls.items()}
+        self._migrate_server_aliases(default_api_urls)
+        url = default_api_urls.get(self.group_key)
+        if url: self._set_group(url)
+        self._refresh_model()
 
     def set_server(self, server):
         """ Set server will submit the cache of the current group (server), then switch to the new server and refresh
@@ -267,14 +276,17 @@ class TokenModel(WritableItemModel, UsedToken):
         # print("set_server", server)
         self.reset_used_token_idx()
         self.submit_cache()
-        self._set_group(self.default_api_envs.get(server, server))
+        self._set_group(server)
         self._refresh_model()
 
     def get_server(self):
         return self.group_key
 
-    def get_server_url(self):
-        return self.default_api_urls.get(self.group_key, self.group_key)
+    def _migrate_server_aliases(self, default_api_urls):
+        for env, url in default_api_urls.items():
+            if env in self.cfg and url not in self.cfg:
+                self.cfg[url] = self.cfg[env]
+
 
 class ServerModel(WritableItemModel, UsedToken):
     INFO_KEYS = ["name","server"]
@@ -285,10 +297,8 @@ class ServerModel(WritableItemModel, UsedToken):
         super().__init__(ini, parser, parent)
         UsedToken.__init__(self)
         self._set_group("servers")
-        self.default_api_envs = dict()
         
     def set_default_servers(self, default_api_urls):
-        self.default_api_envs = {v:k for k, v in default_api_urls.items()}
         self._init_default_servers([
             dict(name="HERE Server", server=default_api_urls["PRD"])
         ])
@@ -318,13 +328,6 @@ class ServerModel(WritableItemModel, UsedToken):
             ])
         self.submit_cache()
 
-
-def make_config_parser():
-    """ ConfigParser for managing token/server
-    """
-    parser = configparser.ConfigParser(allow_no_value=True, delimiters=("*",))
-    parser.optionxform = str
-    return parser
 
 class ServerTokenConfig():
     def __init__(self, ini, parent=None):

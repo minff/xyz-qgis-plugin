@@ -108,7 +108,7 @@ class BaseTestAsync(unittest.TestCase):
         
     def assertMultiInput(self, expected, lst_input, msg="multi input"):
         for i, actual in enumerate(lst_input):
-            self.assertEqual(actual, expected, "{} [{}]".format(msg,i))
+            self.assertEqual(expected, actual, "{} [{}]".format(msg,i))
 
     #unused        
     def assertPairEqual(self, *a):

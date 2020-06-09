@@ -91,7 +91,7 @@ class TokenUX(UXDecorator):
         proxy_model = self.comboBox_token.model()
         return proxy_model.get_token(self.comboBox_token.currentIndex())
     def get_input_server(self):
-        return "PRD" # token_model.get_server()
+        return self.token_model.get_server()
 
     def cb_enable_token_ui(self,flag=True):
         txt_clicked = "Checking.."

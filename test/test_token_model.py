@@ -38,16 +38,23 @@ class TestTokenModel(BaseTestAsync):
         self.assertEqual('[PRD]\nhelloworldtoken,somename\n\n', txt.replace("\r\n","\n"), "ini does not match expected")
 
     def test_load_old_config(self):
-        txt = "[A]\nA0\nA1\nA2\n\n[B]\nB0,\nB1,\nB2,\n\n"
+        """ load old config should results in new config that is backward-compatible. 
+        Expected output contains the old server env and the newly migrated server url
+        """
+        txt = "[PRD]\nA0\nA1,\nA2,A2\n\n[B]\nB0\n\n"
 
         folder = TestFolder()
         folder.save("token.ini", txt)
         ini = folder.fullpath("token.ini")
         token_model = TokenModel(ini)
         token_model.load_from_file()
+
+        url = "https://hub-server-prd.com/hub"
+        token_model.set_default_servers(dict(PRD=url))
         self.assertEqual({
-            'A': [{'token': 'A0'}, {'token': 'A1'}, {'token': 'A2'}], 
-            'B': [{'token': 'B0', 'name': ''}, {'token': 'B1', 'name': ''}, {'token': 'B2', 'name': ''}]
+            'PRD': [{'token': 'A0'}, {'token': 'A1', 'name': ''}, {'token': 'A2', 'name': 'A2'}],
+            url: [{'token': 'A0'}, {'token': 'A1', 'name': ''}, {'token': 'A2', 'name': 'A2'}],
+            'B': [{'token': 'B0'}], 
             },
             token_model.to_dict()
         )
@@ -55,7 +62,7 @@ class TestTokenModel(BaseTestAsync):
         folder.save("token.ini", "")
         token_model.submit_cache()
         out = folder.load("token.ini")
-        self.assertEqual(txt + "[{}]\n\n".format(token_model.get_server()),
+        self.assertEqual(txt + "[{}]\nA0,\nA1,\nA2,A2\n\n".format(url),
             out.replace("\r\n","\n"), "ini does not match expected")
 
     def test_set_server(self):
@@ -64,14 +71,17 @@ class TestTokenModel(BaseTestAsync):
         ini = folder.fullpath("token.ini")
         token_model = TokenModel(ini)
         token_model.load_from_file()
+        folder.save("token.ini", "")
 
         server_env_url = dict(PRD="https://hub-server-prd.com/hub",CIT="https://hub-server-cit.com/hub")
         token_model.set_default_servers(server_env_url)
-        input_token_info = dict()
 
+        # load data via ui functions
+        token_model.refresh_model()
+        input_token_info = dict()
         for server, url in server_env_url.items():
             lst = [dict(name="token for {}".format(server), token="helloworldtoken")]
-            input_token_info[server] = lst
+            input_token_info[url] = lst
 
             token_model.set_server(url)
             for token_info in lst:
@@ -87,39 +97,45 @@ class TestTokenModel(BaseTestAsync):
             token_model.parser.get_config()
             ],
         )
+        out = folder.load("token.ini")
+        self.assertEqual('[https://hub-server-prd.com/hub]\nhelloworldtoken,token for PRD\n\n[https://hub-server-cit.com/hub]\nhelloworldtoken,token for CIT\n\n',
+            out.replace("\r\n","\n"), "ini does not match expected")
 
-    def test_set_server_alias(self):
-        """ test set_server with default servers / server alias, ie. use environment name to refer to server url
+    def test_load_mixed_old_new_config(self):
+        """ test loading config with both old server env and new server url. 
+        Expected the old server env remains unchanged for backward-compatible, 
+        the new server url got updated
         """
+        url = "https://hub-server-prd.com/hub"
+        txt = "[PRD]\nA0\nA1,\nA2,A2\n\n[{}]\nB0,\nB1,\n\n".format(url)
+
         folder = TestFolder()
-        folder.save("token.ini", "")
+        folder.save("token.ini", txt)
         ini = folder.fullpath("token.ini")
         token_model = TokenModel(ini)
         token_model.load_from_file()
+        folder.save("token.ini", "")
 
-        server_env_url = dict(PRD="https://hub-server-prd.com/hub")
+        server_env_url = dict(PRD=url)
         token_model.set_default_servers(server_env_url)
-        input_token_info = dict()
-
-        server_aliases = [s for it in server_env_url.items() for s in it]
-        for server in server_aliases:
-            lst = [dict(name="token for {}".format(server), token="helloworldtoken")]
-            input_token_info[server] = lst
-
-            token_model.set_server(server)
-            for token_info in lst:
-                token_model.appendRow([QStandardItem(t)  
-                    for t in token_model.items_from_data(token_info)
-                ])
-            token_model.submit_cache()
         
         self.assertMultiInput(
-            dict(PRD=sum(input_token_info.values(), [])),
+            {
+            'PRD': [{'token': 'A0'}, {'token': 'A1', 'name': ''}, {'token': 'A2', 'name': 'A2'}], 
+            url: [{'token': 'B0', 'name': ''}, {'token': 'B1', 'name': ''}],
+            },
             [
             token_model.to_dict(),
             token_model.parser.get_config()
             ],
         )
+        
+        token_model.set_server(url)
+        token_model.appendRow([QStandardItem(t) 
+            for t in token_model.items_from_data(dict(token="B2",name=""))])
+        token_model.submit_cache()
+        out = folder.load("token.ini")
+        self.assertEqual(txt.replace("B1,","B1,\nB2,"), out.replace("\r\n","\n"), "ini does not match expected")
 
 class TestConfigParserMixin(BaseTestAsync):
     def test_deserialize_token(self):
@@ -308,18 +324,19 @@ class TestConfigParserMixin(BaseTestAsync):
             ]
             for s in sections
         }
+        txt = "[A]\nA0,A0\nA1,A1\nA2,A2\n\n[B]\nB0,B0\nB1,B1\nB2,B2\n\n"
 
         parser.update_config(data)
         folder.save("token.ini", "")
         parser.write_to_file()
-        txt = folder.load("token.ini")
+        out = folder.load("token.ini")
         try:
             self.assertEqual(
                 ok_sections,
                 cfg.sections(),
             )
-            self._test_ini_valid_sections(txt, ok_sections)
-            self.assertEqual("[A]\nA0,A0\nA1,A1\nA2,A2\n\n[B]\nB0,B0\nB1,B1\nB2,B2\n\n", txt.replace("\r\n","\n"), "ini does not match expected")
+            self._test_ini_valid_sections(out, ok_sections)
+            self.assertEqual(txt, out.replace("\r\n","\n"), "ini does not match expected")
         except Exception as e:
             self._log_error("sections:", dict(cfg._sections))
             self._log_error("ini content:\n", txt)
@@ -360,9 +377,9 @@ class TestConfigParserMixin(BaseTestAsync):
 
             folder.save("token.ini", "")
             parser.write_to_file()
-            txt = folder.load("token.ini")
+            out = folder.load("token.ini")
             self._test_ini_valid_sections(txt, ok_sections)
-            self.assertEqual("[A]\nA0,A0\nA1,A1\nA2,A2\n\n[B]\nB0,B0\nB1,B1\nB2,B2\n\n", txt.replace("\r\n","\n"), "ini does not match expected")
+            self.assertEqual(txt, out.replace("\r\n","\n"), "ini does not match expected")
         except Exception as e:
             self._log_error("sections:", dict(cfg._sections))
             self._log_error("ini content:\n", txt)
@@ -390,28 +407,7 @@ class TestConfigParserMixin(BaseTestAsync):
             "[]",
             r"\[[\s]*\]", "sections with invalid name found"
         )
-
-    def test_load_old_config(self):
-        txt = "[A]\nA0\nA1\nA2\n\n[B]\nB0,\nB1,\nB2,\n\n"
-
-        folder = TestFolder()
-        folder.save("token.ini", txt)
-        ini = folder.fullpath("token.ini")
-        cfg = make_config_parser()
-        parser = ConfigParserMixin(ini, cfg, serialize_keys=("token","name"))
-        parser.read_from_file()
-        self.assertEqual({
-            'A': [{'token': 'A0'}, {'token': 'A1'}, {'token': 'A2'}], 
-            'B': [{'token': 'B0', 'name': ''}, {'token': 'B1', 'name': ''}, {'token': 'B2', 'name': ''}]
-            },
-            parser.get_config()
-        )
-
-        folder.save("token.ini", "")
-        parser.write_to_file()
-        out = folder.load("token.ini")
-        self.assertEqual(txt, out.replace("\r\n","\n"), "ini does not match expected")
-
+        
 if __name__ == "__main__":
     unittest.main()
     # tests = [
