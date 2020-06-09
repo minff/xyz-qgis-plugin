@@ -94,7 +94,8 @@ class ConnectUX(SpaceUX):
             btn.setToolTip(msg)
         self.lineEdit_max_feat.setToolTip("Maximum limit of features to be loaded")
         self.lineEdit_limit.setToolTip("Number of features loaded per request")
-        self.btn_filter.setToolTip("Filter feature by property")
+        self.lineEdit_selection.setToolTip("Load only the selected properties of features")
+        self.btn_filter.setToolTip("Query features by property")
             
     def _get_loading_mode(self) -> str:
         for mode, box in zip(LOADING_MODES, [
